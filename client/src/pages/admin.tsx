@@ -169,6 +169,14 @@ export default function Admin() {
                     <FileText size={16}/> المقالات
                   </div>
                 </TabsTrigger>
+                <TabsTrigger 
+                  value="media" 
+                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    <ImageIcon size={16}/> الوسائط
+                  </div>
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -608,6 +616,52 @@ export default function Admin() {
                           <p>لا توجد مقالات بعد. قم بإضافة أول خبر!</p>
                         </div>
                       )}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="media" className="mt-0">
+                <div className="space-y-6">
+                  <div className="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                    <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                      <Plus size={18} className="text-secondary" /> رفع صور جديدة
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>اختر الصور</Label>
+                        <Input type="file" multiple accept="image/*" className="bg-background" />
+                      </div>
+                      <Button className="w-full gap-2 bg-primary hover:bg-primary/90">
+                        <ImageIcon size={16}/> رفع الصور
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-bold text-primary mb-4">الصور والوسائط</h3>
+                    <div className="grid md:grid-cols-4 gap-4">
+                      {[
+                        { id: 1, url: "https://via.placeholder.com/300?bg=1f3a93&text=حفل+مدرسي", title: "فعالية مدرسية 1" },
+                        { id: 2, url: "https://via.placeholder.com/300?bg=ef4444&text=نشاط+تعليمي", title: "نشاط تعليمي" },
+                        { id: 3, url: "https://via.placeholder.com/300?bg=22b366&text=فعالية+رياضية", title: "فعالية رياضية" },
+                        { id: 4, url: "https://via.placeholder.com/300?bg=1f3a93&text=حفل+تخرج", title: "حفل تخرج" },
+                      ].map(img => (
+                        <div key={img.id} className="group relative rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all">
+                          <img src={img.url} alt={img.title} className="w-full h-40 object-cover" />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <Button size="icon" variant="ghost" className="text-white hover:bg-primary/50">
+                              <Edit size={16} />
+                            </Button>
+                            <Button size="icon" variant="ghost" className="text-white hover:bg-destructive/50">
+                              <Trash size={16} />
+                            </Button>
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <p className="text-white text-xs font-medium">{img.title}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>

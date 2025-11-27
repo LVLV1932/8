@@ -34,68 +34,69 @@
 }
 
 :root {
-  /* Elegant Emerald & Gold Theme */
+  /* Al-Zubair School Colors - Navy Blue, Red, Green & White */
   --background: 0 0% 98%;
-  --foreground: 160 40% 10%;
+  --foreground: 210 30% 12%;
   
   --card: 0 0% 100%;
-  --card-foreground: 160 40% 10%;
+  --card-foreground: 210 30% 12%;
   
   --popover: 0 0% 100%;
-  --popover-foreground: 160 40% 10%;
+  --popover-foreground: 210 30% 12%;
   
-  /* Deep Emerald Green */
-  --primary: 166 60% 15%; /* #0f3d2e */
+  /* Deep Navy Blue (Primary) - From Logo */
+  --primary: 210 50% 20%; /* #0f3d5c */
   --primary-foreground: 0 0% 98%;
   
-  /* Luxurious Gold */
-  --secondary: 45 90% 50%; /* #f59e0b - slightly warmer gold */
-  --secondary-foreground: 0 0% 10%;
+  /* Vibrant Red (Secondary) - From Logo */
+  --secondary: 0 85% 50%; /* #ff4444 - bright red accent */
+  --secondary-foreground: 0 0% 100%;
   
-  --muted: 166 20% 96%;
-  --muted-foreground: 166 10% 40%;
+  /* Accent Green - From Logo */
+  --accent: 130 60% 40%; /* #22b366 - green accent */
+  --accent-foreground: 0 0% 100%;
   
-  --accent: 166 20% 94%;
-  --accent-foreground: 166 60% 15%;
+  --muted: 210 20% 95%;
+  --muted-foreground: 210 15% 40%;
   
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 166 20% 90%;
-  --input: 166 20% 90%;
-  --ring: 166 60% 15%;
+  --border: 210 20% 88%;
+  --input: 210 20% 88%;
+  --ring: 210 50% 20%;
   
   --radius: 0.75rem;
 }
 
 .dark {
-  --background: 166 50% 5%;
-  --foreground: 166 10% 95%;
+  --background: 210 40% 8%;
+  --foreground: 210 20% 95%;
   
-  --card: 166 50% 8%;
-  --card-foreground: 166 10% 95%;
+  --card: 210 40% 12%;
+  --card-foreground: 210 20% 95%;
   
-  --popover: 166 50% 8%;
-  --popover-foreground: 166 10% 95%;
+  --popover: 210 40% 12%;
+  --popover-foreground: 210 20% 95%;
   
-  --primary: 166 40% 50%; /* Lighter emerald for dark mode */
+  --primary: 210 50% 45%;
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 45 90% 50%;
-  --secondary-foreground: 0 0% 10%;
+  --secondary: 0 85% 55%;
+  --secondary-foreground: 0 0% 100%;
   
-  --muted: 166 30% 15%;
-  --muted-foreground: 166 10% 65%;
+  --accent: 130 60% 50%;
+  --accent-foreground: 0 0% 100%;
   
-  --accent: 166 30% 15%;
-  --accent-foreground: 166 10% 95%;
+  --muted: 210 30% 20%;
+  --muted-foreground: 210 20% 70%;
   
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
   
-  --border: 166 30% 15%;
-  --input: 166 30% 15%;
-  --ring: 166 40% 50%;
+  --border: 210 30% 20%;
+  --input: 210 30% 20%;
+  --ring: 210 50% 45%;
 }
 
 @layer base {
