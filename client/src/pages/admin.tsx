@@ -23,13 +23,13 @@ export default function Admin() {
     articles, addArticle, updateArticle, deleteArticle,
     assignedCodes, addAssignedCode, updateAssignedCode, deleteAssignedCode,
     questions, answerQuestion, deleteQuestion,
-    users, addNotification
+    users, updateUser
   } = useSchool();
 
   // Local state for forms
   const [newTeacher, setNewTeacher] = useState({ name: "", email: "", subject: "", role: "", bio: "" });
   const [newProgram, setNewProgram] = useState({ title: "", desc: "", icon: "BookOpen" });
-  const [newArticle, setNewArticle] = useState({ title: "", content: "", author: "", forStudents: false });
+  const [newArticle, setNewArticle] = useState({ title: "", content: "", author: "", forStudents: false as boolean });
   const [newCode, setNewCode] = useState({ code: "", grade: "", assignedTo: "" });
   const [answerText, setAnswerText] = useState("");
 
@@ -196,6 +196,14 @@ export default function Admin() {
                 >
                   <div className="flex items-center gap-2">
                     <MessageSquare size={16}/> أسئلة الطلاب
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="users" 
+                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    <Users size={16}/> المستخدمين والرتب
                   </div>
                 </TabsTrigger>
               </TabsList>
@@ -795,6 +803,53 @@ export default function Admin() {
                           </Dialog>
                         )}
                         <Button variant="ghost" size="sm" onClick={() => deleteQuestion(q.id)} className="text-destructive">حذف</Button>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="users" className="mt-0">
+                <div>
+                  <h3 className="text-lg font-bold text-primary mb-6">إدارة المستخدمين والرتب</h3>
+                  <div className="space-y-4">
+                    {users.map((user) => (
+                      <motion.div key={user.id} layout initial={{opacity: 0}} animate={{opacity: 1}} className="bg-background border rounded-xl p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex-1">
+                            <h4 className="font-bold text-primary text-lg">{user.name}</h4>
+                            <p className="text-sm text-muted-foreground mb-2">{user.email}</p>
+                            <div className="flex flex-wrap gap-2">
+                              {user.grade && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">الصف: {user.grade}</span>}
+                              {user.subject && <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">التخصص: {user.subject}</span>}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            {user.role === "student" && (
+                              <span className="bg-accent/10 text-accent px-3 py-1 rounded-full text-sm font-bold">طالب 👨‍🎓</span>
+                            )}
+                            {user.role === "teacher" && (
+                              <span className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-bold">معلم 👨‍🏫</span>
+                            )}
+                            {user.role === "admin" && (
+                              <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold">إدارة 👨‍💼</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          {user.role !== "admin" && (
+                            <>
+                              <Button size="sm" variant="outline" className="gap-1" onClick={() => {
+                                updateUser({...user, role: "teacher"});
+                                toast({title: "تم تحديث الرتبة إلى معلم ✓"});
+                              }}>معلم</Button>
+                              <Button size="sm" variant="outline" className="gap-1" onClick={() => {
+                                updateUser({...user, role: "student"});
+                                toast({title: "تم تحديث الرتبة إلى طالب ✓"});
+                              }}>طالب</Button>
+                            </>
+                          )}
+                        </div>
                       </motion.div>
                     ))}
                   </div>

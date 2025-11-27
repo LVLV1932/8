@@ -99,6 +99,7 @@ type SchoolContextType = {
   loginUser: (email: string, password: string) => boolean;
   logoutUser: () => void;
   registerUser: (user: Omit<User, "id" | "joinDate">) => boolean;
+  updateUser: (user: User) => void;
   
   // Teacher actions
   addTeacher: (teacher: Omit<Teacher, "id">) => void;
@@ -287,6 +288,13 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
+  const updateUser = (updated: User) => {
+    setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
+    if (currentUser?.id === updated.id) {
+      setCurrentUser(updated);
+    }
+  };
+
   // Teacher actions
   const addTeacher = (teacher: Omit<Teacher, "id">) => {
     setTeachers(prev => [...prev, { ...teacher, id: Date.now() }]);
@@ -393,7 +401,7 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
   return (
     <SchoolContext.Provider value={{
       teachers, programs, articles, users, assignedCodes, notifications, questions, config, currentUser,
-      loginUser, logoutUser, registerUser,
+      loginUser, logoutUser, registerUser, updateUser,
       addTeacher, updateTeacher, deleteTeacher,
       addProgram, updateProgram, deleteProgram,
       addArticle, updateArticle, deleteArticle,

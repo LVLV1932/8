@@ -2,14 +2,13 @@ import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import { Menu, X, Sun, Moon, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/hooks/use-theme";
 
 import schoolLogo from "@assets/logo_1764275780967.png";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [location] = useLocation();
-  const { theme, setTheme } = useTheme();
+  const [theme, setTheme] = useState("light");
 
   const links = [
     { href: "/", label: "الرئيسية" },
