@@ -9,7 +9,10 @@ import abstractBg from "@assets/generated_images/abstract_academic_background.pn
 import { useSchool } from "@/lib/store";
 
 export default function Home() {
-  const { config } = useSchool();
+  const { config, articles } = useSchool();
+
+  // Get latest 3 articles
+  const latestArticles = articles.slice(0, 3);
 
   return (
     <Layout>
@@ -75,6 +78,41 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Latest News (New Section) */}
+      {latestArticles.length > 0 && (
+        <section className="py-16 bg-muted/30">
+          <div className="container mx-auto px-4 md:px-8">
+            <div className="flex justify-between items-end mb-10">
+              <div>
+                <h2 className="text-3xl font-bold text-primary mb-2">أحدث الأخبار</h2>
+                <p className="text-muted-foreground">تابع نشاطات وفعاليات المدرسة</p>
+              </div>
+              <Link href="/articles">
+                <Button variant="link" className="text-secondary hover:text-secondary/80 gap-2">
+                  عرض كل الأخبار <ArrowLeft size={16} />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {latestArticles.map((article, i) => (
+                <Card key={article.id} className="border-none shadow-md hover:shadow-xl transition-all group cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="text-xs text-secondary font-bold mb-2">{article.date}</div>
+                    <h3 className="text-lg font-bold text-primary mb-3 group-hover:text-secondary transition-colors line-clamp-2">
+                      {article.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm line-clamp-3">
+                      {article.content}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Features Section */}
       <section className="py-24 bg-background">

@@ -6,20 +6,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocation } from "wouter";
-import { Plus, Trash, Edit, Image as ImageIcon, FileText, Users, Settings, Save, LogOut, BookOpen, CheckCircle, AlertCircle } from "lucide-react";
-import { useSchool } from "@/lib/store";
+import { Plus, Trash, Edit, Image as ImageIcon, FileText, Users, Settings, Save, LogOut, BookOpen, CheckCircle, AlertCircle, X } from "lucide-react";
+import { useSchool, Teacher, Program, Article } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 
 export default function Admin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { config, updateConfig, teachers, addTeacher, deleteTeacher, programs, addProgram, deleteProgram } = useSchool();
+  const { 
+    config, updateConfig, 
+    teachers, addTeacher, updateTeacher, deleteTeacher, 
+    programs, addProgram, updateProgram, deleteProgram,
+    articles, addArticle, updateArticle, deleteArticle
+  } = useSchool();
 
   // Local state for forms
   const [newTeacher, setNewTeacher] = useState({ name: "", subject: "", role: "", bio: "" });
   const [newProgram, setNewProgram] = useState({ title: "", desc: "", icon: "BookOpen" });
+  const [newArticle, setNewArticle] = useState({ title: "", content: "", author: "" });
+
+  // Edit States
+  const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
+  const [editingProgram, setEditingProgram] = useState<Program | null>(null);
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
 
   const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +47,7 @@ export default function Admin() {
     toast({ title: "تم حفظ الإعدادات بنجاح" });
   };
 
+  // Teacher Handlers
   const handleAddTeacher = () => {
     if (!newTeacher.name || !newTeacher.subject) {
       toast({ variant: "destructive", title: "خطأ", description: "يرجى ملء الحقول المطلوبة" });
@@ -45,6 +58,14 @@ export default function Admin() {
     toast({ title: "تم إضافة المدرس بنجاح" });
   };
 
+  const handleUpdateTeacher = () => {
+    if (!editingTeacher) return;
+    updateTeacher(editingTeacher);
+    setEditingTeacher(null);
+    toast({ title: "تم تحديث بيانات المدرس" });
+  };
+
+  // Program Handlers
   const handleAddProgram = () => {
     if (!newProgram.title) {
       toast({ variant: "destructive", title: "خطأ", description: "العنوان مطلوب" });
@@ -53,6 +74,31 @@ export default function Admin() {
     addProgram(newProgram);
     setNewProgram({ title: "", desc: "", icon: "BookOpen" });
     toast({ title: "تم إضافة البرنامج بنجاح" });
+  };
+
+  const handleUpdateProgram = () => {
+    if (!editingProgram) return;
+    updateProgram(editingProgram);
+    setEditingProgram(null);
+    toast({ title: "تم تحديث البرنامج" });
+  };
+
+  // Article Handlers
+  const handleAddArticle = () => {
+    if (!newArticle.title || !newArticle.content) {
+      toast({ variant: "destructive", title: "خطأ", description: "العنوان والمحتوى مطلوبان" });
+      return;
+    }
+    addArticle(newArticle);
+    setNewArticle({ title: "", content: "", author: "" });
+    toast({ title: "تم نشر المقال بنجاح" });
+  };
+
+  const handleUpdateArticle = () => {
+    if (!editingArticle) return;
+    updateArticle(editingArticle);
+    setEditingArticle(null);
+    toast({ title: "تم تحديث المقال" });
   };
 
   return (
@@ -89,11 +135,11 @@ export default function Admin() {
       <div className="container mx-auto px-4 -mt-12 pb-12">
         <Card className="shadow-xl border-none bg-background/95 backdrop-blur-sm overflow-hidden">
           <Tabs defaultValue="config" className="w-full">
-            <div className="border-b bg-muted/30 px-6 pt-2">
-              <TabsList className="bg-transparent h-auto p-0 gap-6">
+            <div className="border-b bg-muted/30 px-6 pt-2 overflow-x-auto">
+              <TabsList className="bg-transparent h-auto p-0 gap-6 inline-flex min-w-full md:min-w-0">
                 <TabsTrigger 
                   value="config" 
-                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all"
+                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
                 >
                   <div className="flex items-center gap-2">
                     <Settings size={16}/> الإعدادات العامة
@@ -101,7 +147,7 @@ export default function Admin() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="teachers" 
-                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all"
+                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
                 >
                   <div className="flex items-center gap-2">
                     <Users size={16}/> المدرسون
@@ -109,18 +155,18 @@ export default function Admin() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="programs" 
-                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all"
+                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
                 >
                   <div className="flex items-center gap-2">
                     <BookOpen size={16}/> البرامج
                   </div>
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="media" 
-                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all"
+                  value="articles" 
+                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
                 >
                   <div className="flex items-center gap-2">
-                    <ImageIcon size={16}/> الوسائط
+                    <FileText size={16}/> المقالات
                   </div>
                 </TabsTrigger>
               </TabsList>
@@ -262,28 +308,61 @@ export default function Admin() {
                               <p className="text-xs text-muted-foreground font-medium">{teacher.subject}</p>
                             </div>
                           </div>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 -mt-1 -ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => {
-                              if(confirm('هل أنت متأكد من الحذف؟')) {
-                                deleteTeacher(teacher.id);
-                                toast({ title: "تم الحذف بنجاح" });
-                              }
-                            }}
-                          >
-                            <Trash size={16}/>
-                          </Button>
+                          <div className="flex gap-1">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                  onClick={() => setEditingTeacher(teacher)}
+                                >
+                                  <Edit size={16}/>
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>تعديل بيانات المدرس</DialogTitle>
+                                </DialogHeader>
+                                {editingTeacher && (
+                                  <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                      <Label>الاسم</Label>
+                                      <Input value={editingTeacher.name} onChange={e => setEditingTeacher({...editingTeacher, name: e.target.value})} />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>المادة</Label>
+                                      <Input value={editingTeacher.subject} onChange={e => setEditingTeacher({...editingTeacher, subject: e.target.value})} />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>المنصب</Label>
+                                      <Input value={editingTeacher.role} onChange={e => setEditingTeacher({...editingTeacher, role: e.target.value})} />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>نبذة</Label>
+                                      <Textarea value={editingTeacher.bio} onChange={e => setEditingTeacher({...editingTeacher, bio: e.target.value})} />
+                                    </div>
+                                    <Button onClick={handleUpdateTeacher} className="w-full">حفظ التعديلات</Button>
+                                  </div>
+                                )}
+                              </DialogContent>
+                            </Dialog>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => {
+                                if(confirm('هل أنت متأكد من الحذف؟')) {
+                                  deleteTeacher(teacher.id);
+                                  toast({ title: "تم الحذف بنجاح" });
+                                }
+                              }}
+                            >
+                              <Trash size={16}/>
+                            </Button>
+                          </div>
                         </motion.div>
                       ))}
-                      
-                      {teachers.length === 0 && (
-                        <div className="col-span-full flex flex-col items-center justify-center py-12 text-muted-foreground border-2 border-dashed rounded-xl bg-muted/30">
-                          <AlertCircle className="w-10 h-10 mb-2 opacity-20" />
-                          <p>لا يوجد مدرسين مضافين حالياً</p>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -349,37 +428,189 @@ export default function Admin() {
                               <p className="text-sm text-muted-foreground max-w-md truncate">{program.desc}</p>
                             </div>
                           </div>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => {
-                              deleteProgram(program.id);
-                              toast({ title: "تم الحذف بنجاح" });
-                            }}
-                          >
-                            <Trash size={16}/>
-                          </Button>
+                          <div className="flex gap-1">
+                             <Dialog>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                  onClick={() => setEditingProgram(program)}
+                                >
+                                  <Edit size={16}/>
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>تعديل البرنامج</DialogTitle>
+                                </DialogHeader>
+                                {editingProgram && (
+                                  <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                      <Label>العنوان</Label>
+                                      <Input value={editingProgram.title} onChange={e => setEditingProgram({...editingProgram, title: e.target.value})} />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>الوصف</Label>
+                                      <Textarea value={editingProgram.desc} onChange={e => setEditingProgram({...editingProgram, desc: e.target.value})} />
+                                    </div>
+                                    <Button onClick={handleUpdateProgram} className="w-full">حفظ التعديلات</Button>
+                                  </div>
+                                )}
+                              </DialogContent>
+                            </Dialog>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => {
+                                deleteProgram(program.id);
+                                toast({ title: "تم الحذف بنجاح" });
+                              }}
+                            >
+                              <Trash size={16}/>
+                            </Button>
+                          </div>
                         </motion.div>
                       ))}
                     </div>
                   </div>
                 </div>
               </TabsContent>
-              
-              <TabsContent value="media" className="mt-0">
-                 <div className="flex flex-col items-center justify-center py-16 bg-muted/20 rounded-xl border-2 border-dashed">
-                   <div className="bg-primary/5 p-4 rounded-full mb-4">
-                     <ImageIcon className="h-8 w-8 text-primary/40" />
-                   </div>
-                   <h3 className="text-lg font-bold text-primary mb-2">مكتبة الوسائط</h3>
-                   <p className="text-muted-foreground mb-6 max-w-sm text-center">
-                     قم برفع صور الفعاليات والنشاطات المدرسية ليتم عرضها في المعرض
-                   </p>
-                   <Button variant="outline" disabled>
-                     خاصية قيد التطوير
-                   </Button>
-                 </div>
+
+              <TabsContent value="articles" className="mt-0">
+                <div className="grid lg:grid-cols-12 gap-8">
+                   {/* Add Form */}
+                   <div className="lg:col-span-4 space-y-6">
+                    <div className="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                      <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                        <Plus size={18} className="text-secondary" /> نشر مقال جديد
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>عنوان المقال</Label>
+                          <Input 
+                            value={newArticle.title}
+                            onChange={e => setNewArticle({...newArticle, title: e.target.value})}
+                            className="bg-background"
+                            placeholder="عنوان جذاب..."
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>الكاتب (اختياري)</Label>
+                          <Input 
+                            value={newArticle.author}
+                            onChange={e => setNewArticle({...newArticle, author: e.target.value})}
+                            className="bg-background"
+                            placeholder="مثال: الإدارة"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>المحتوى</Label>
+                          <Textarea 
+                            value={newArticle.content}
+                            onChange={e => setNewArticle({...newArticle, content: e.target.value})}
+                            className="bg-background"
+                            rows={8}
+                            placeholder="اكتب تفاصيل الخبر هنا..."
+                          />
+                        </div>
+                        <Button onClick={handleAddArticle} className="w-full gap-2 mt-2">
+                          <FileText size={16}/> نشر الآن
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                   {/* List */}
+                  <div className="lg:col-span-8">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-bold text-primary">المقالات المنشورة</h3>
+                      <span className="bg-secondary/20 text-secondary-foreground px-3 py-1 rounded-full text-sm font-bold">
+                        {articles.length} مقال
+                      </span>
+                    </div>
+
+                    <div className="space-y-4">
+                      {articles.map((article) => (
+                        <motion.div 
+                          layout
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          key={article.id}
+                          className="bg-background border rounded-xl p-5 flex flex-col gap-3 group hover:border-secondary/50 transition-all shadow-sm"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                                  <span>{article.date}</span>
+                                  {article.author && <span>• {article.author}</span>}
+                               </div>
+                               <h4 className="font-bold text-lg text-primary">{article.title}</h4>
+                            </div>
+                            <div className="flex gap-1">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                    onClick={() => setEditingArticle(article)}
+                                  >
+                                    <Edit size={16}/>
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>تعديل المقال</DialogTitle>
+                                  </DialogHeader>
+                                  {editingArticle && (
+                                    <div className="space-y-4 py-4">
+                                      <div className="space-y-2">
+                                        <Label>العنوان</Label>
+                                        <Input value={editingArticle.title} onChange={e => setEditingArticle({...editingArticle, title: e.target.value})} />
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>الكاتب</Label>
+                                        <Input value={editingArticle.author} onChange={e => setEditingArticle({...editingArticle, author: e.target.value})} />
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>المحتوى</Label>
+                                        <Textarea rows={8} value={editingArticle.content} onChange={e => setEditingArticle({...editingArticle, content: e.target.value})} />
+                                      </div>
+                                      <Button onClick={handleUpdateArticle} className="w-full">حفظ التعديلات</Button>
+                                    </div>
+                                  )}
+                                </DialogContent>
+                              </Dialog>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => {
+                                  deleteArticle(article.id);
+                                  toast({ title: "تم الحذف بنجاح" });
+                                }}
+                              >
+                                <Trash size={16}/>
+                              </Button>
+                            </div>
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                            {article.content}
+                          </p>
+                        </motion.div>
+                      ))}
+                      
+                      {articles.length === 0 && (
+                        <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">
+                          <FileText className="w-10 h-10 mx-auto mb-2 opacity-20" />
+                          <p>لا توجد مقالات بعد. قم بإضافة أول خبر!</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
             </div>
           </Tabs>

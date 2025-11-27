@@ -23,6 +23,7 @@ export type Article = {
   content: string;
   image?: string;
   date: string;
+  author?: string;
 };
 
 export type SchoolConfig = {
@@ -46,9 +47,11 @@ type SchoolContextType = {
   updateTeacher: (teacher: Teacher) => void;
   deleteTeacher: (id: number) => void;
   addProgram: (program: Omit<Program, "id">) => void;
+  updateProgram: (program: Program) => void;
   deleteProgram: (id: number) => void;
   updateConfig: (config: Partial<SchoolConfig>) => void;
   addArticle: (article: Omit<Article, "id" | "date">) => void;
+  updateArticle: (article: Article) => void;
   deleteArticle: (id: number) => void;
 };
 
@@ -68,6 +71,23 @@ const initialPrograms: Program[] = [
   { id: 3, title: "الرياضيات", desc: "مناهج متقدمة", icon: "Calculator" },
 ];
 
+const initialArticles: Article[] = [
+  { 
+    id: 1, 
+    title: "حفل تكريم المتفوقين السنوي", 
+    content: "أقامت المدرسة حفلها السنوي لتكريم الطلبة الأوائل بحضور السيد مدير التربية ونخبة من أولياء الأمور. تم توزيع الجوائز والشهادات التقديرية على الطلاب المتميزين.", 
+    date: "2024/05/15",
+    author: "الإدارة"
+  },
+  { 
+    id: 2, 
+    title: "افتتاح المختبر العلمي الجديد", 
+    content: "تم اليوم افتتاح مختبر الروبوتات والذكاء الاصطناعي الجديد، المجهز بأحدث التقنيات العالمية لخدمة طلابنا وتطوير مهاراتهم البرمجية.", 
+    date: "2024/04/20",
+    author: "قسم الحاسوب"
+  }
+];
+
 const initialConfig: SchoolConfig = {
   name: "ثانوية الزبير للمتفوقين",
   description: "صرح علمي لبناء قادة المستقبل",
@@ -83,30 +103,38 @@ const initialConfig: SchoolConfig = {
 export function SchoolProvider({ children }: { children: React.ReactNode }) {
   // Initialize state from localStorage or defaults
   const [teachers, setTeachers] = useState<Teacher[]>(() => {
+    if (typeof window === 'undefined') return initialTeachers;
     const saved = localStorage.getItem("school_teachers");
     return saved ? JSON.parse(saved) : initialTeachers;
   });
 
   const [programs, setPrograms] = useState<Program[]>(() => {
+    if (typeof window === 'undefined') return initialPrograms;
     const saved = localStorage.getItem("school_programs");
     return saved ? JSON.parse(saved) : initialPrograms;
   });
 
   const [articles, setArticles] = useState<Article[]>(() => {
+    if (typeof window === 'undefined') return initialArticles;
     const saved = localStorage.getItem("school_articles");
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : initialArticles;
   });
 
   const [config, setConfig] = useState<SchoolConfig>(() => {
+    if (typeof window === 'undefined') return initialConfig;
     const saved = localStorage.getItem("school_config");
     return saved ? JSON.parse(saved) : initialConfig;
   });
 
   // Persist to localStorage whenever state changes
-  useEffect(() => localStorage.setItem("school_teachers", JSON.stringify(teachers)), [teachers]);
-  useEffect(() => localStorage.setItem("school_programs", JSON.stringify(programs)), [programs]);
-  useEffect(() => localStorage.setItem("school_articles", JSON.stringify(articles)), [articles]);
-  useEffect(() => localStorage.setItem("school_config", JSON.stringify(config)), [config]);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("school_teachers", JSON.stringify(teachers));
+      localStorage.setItem("school_programs", JSON.stringify(programs));
+      localStorage.setItem("school_articles", JSON.stringify(articles));
+      localStorage.setItem("school_config", JSON.stringify(config));
+    }
+  }, [teachers, programs, articles, config]);
 
   // Actions
   const addTeacher = (teacher: Omit<Teacher, "id">) => {
@@ -125,6 +153,10 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     setPrograms(prev => [...prev, { ...program, id: Date.now() }]);
   };
 
+  const updateProgram = (updated: Program) => {
+    setPrograms(prev => prev.map(p => p.id === updated.id ? updated : p));
+  };
+
   const deleteProgram = (id: number) => {
     setPrograms(prev => prev.filter(p => p.id !== id));
   };
@@ -141,6 +173,10 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     }]);
   };
 
+  const updateArticle = (updated: Article) => {
+    setArticles(prev => prev.map(a => a.id === updated.id ? updated : a));
+  };
+
   const deleteArticle = (id: number) => {
     setArticles(prev => prev.filter(a => a.id !== id));
   };
@@ -149,9 +185,9 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     <SchoolContext.Provider value={{
       teachers, programs, articles, config,
       addTeacher, updateTeacher, deleteTeacher,
-      addProgram, deleteProgram,
+      addProgram, updateProgram, deleteProgram,
       updateConfig,
-      addArticle, deleteArticle
+      addArticle, updateArticle, deleteArticle
     }}>
       {children}
     </SchoolContext.Provider>

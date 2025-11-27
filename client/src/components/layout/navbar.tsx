@@ -13,29 +13,33 @@ export function Navbar() {
     { href: "/", label: "الرئيسية" },
     { href: "/about", label: "عن المدرسة" },
     { href: "/programs", label: "برامجنا" },
+    { href: "/articles", label: "أخبارنا" },
     { href: "/teachers", label: "الهيئة التدريسية" },
     { href: "/contact", label: "تواصل معنا" },
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="container mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary">
-          <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+          <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md">
             <GraduationCap size={24} />
           </div>
-          <span className="hidden md:inline-block">ثانوية الزبير للمتفوقين</span>
+          <span className="hidden md:inline-block font-tajawal font-black tracking-wide">ثانوية الزبير للمتفوقين</span>
         </Link>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-6">
           {links.map((link) => (
             <Link key={link.href} href={link.href}>
-              <span className={`text-sm font-medium transition-colors hover:text-secondary cursor-pointer ${
-                location === link.href ? "text-secondary" : "text-foreground/80"
+              <span className={`text-sm font-bold transition-all hover:text-secondary cursor-pointer relative ${
+                location === link.href ? "text-secondary" : "text-foreground/70"
               }`}>
                 {link.label}
+                {location === link.href && (
+                  <span className="absolute -bottom-6 left-0 w-full h-1 bg-secondary rounded-t-md animate-in fade-in zoom-in duration-300" />
+                )}
               </span>
             </Link>
           ))}
@@ -48,11 +52,12 @@ export function Navbar() {
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             title="تبديل الوضع"
+            className="text-foreground/70 hover:text-primary"
           >
             {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
           </Button>
           <Link href="/login">
-            <Button variant="outline" size="sm">تسجيل الدخول</Button>
+            <Button variant="outline" size="sm" className="border-primary/20 hover:border-primary hover:bg-primary/5 text-primary font-bold">تسجيل الدخول</Button>
           </Link>
         </div>
 

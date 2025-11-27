@@ -13,6 +13,7 @@ import Teachers from "@/pages/teachers";
 import Contact from "@/pages/contact";
 import Login from "@/pages/login";
 import Admin from "@/pages/admin";
+import Articles from "@/pages/articles";
 
 function Router() {
   return (
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/programs" component={Programs} />
       <Route path="/teachers" component={Teachers} />
+      <Route path="/articles" component={Articles} />
       <Route path="/contact" component={Contact} />
       <Route path="/login" component={Login} />
       <Route path="/admin" component={Admin} />
