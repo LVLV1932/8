@@ -1,5 +1,6 @@
-import { GraduationCap, Facebook, Instagram, Twitter, MapPin, Phone, Mail } from "lucide-react";
+import { Facebook, Instagram, Twitter, MapPin, Phone, Mail } from "lucide-react";
 import { Link } from "wouter";
+import schoolLogo from "@assets/logo_1764275780967.png";
 
 export function Footer() {
   return (
@@ -8,9 +9,7 @@ export function Footer() {
         {/* Brand */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 font-bold text-xl">
-            <div className="h-10 w-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center">
-              <GraduationCap size={24} />
-            </div>
+            <img src={schoolLogo} alt="شعار المدرسة" className="h-12 w-12 rounded-full object-cover border-2 border-secondary/20" />
             <span>ثانوية الزبير للمتفوقين</span>
           </div>
           <p className="text-primary-foreground/80 text-sm leading-relaxed">

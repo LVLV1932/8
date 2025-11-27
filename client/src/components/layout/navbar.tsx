@@ -4,6 +4,8 @@ import { Menu, X, Sun, Moon, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 
+import schoolLogo from "@assets/logo_1764275780967.png";
+
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [location] = useLocation();
@@ -23,9 +25,7 @@ export function Navbar() {
       <div className="container mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary">
-          <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md">
-            <GraduationCap size={24} />
-          </div>
+          <img src={schoolLogo} alt="شعار المدرسة" className="h-12 w-12 rounded-full object-cover shadow-md" />
           <span className="hidden md:inline-block font-tajawal font-black tracking-wide">ثانوية الزبير للمتفوقين</span>
         </Link>
 

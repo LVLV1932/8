@@ -46,10 +46,6 @@ export default function Teachers() {
                     {teacher.bio}
                   </p>
 
-                  <button className="w-full py-2 rounded-lg border border-input hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium flex items-center justify-center gap-2">
-                    <Mail size={16} />
-                    تواصل مع المدرس
-                  </button>
                 </CardContent>
               </Card>
             ))}

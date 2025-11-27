@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, FlaskConical, Trophy } from "lucide-react";
-import heroImage from "@assets/generated_images/modern_high_school_exterior_architecture.png";
+import heroVideo from "@assets/generated_videos/cinematic_modern_high_school_campus.mp4";
 import abstractBg from "@assets/generated_images/abstract_academic_background.png";
 import { useSchool } from "@/lib/store";
 
@@ -19,9 +19,12 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img 
-            src={heroImage} 
-            alt={config.name} 
+          <video 
+            src={heroVideo} 
+            autoPlay 
+            muted 
+            loop 
+            playsInline
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/60 mix-blend-multiply" />
