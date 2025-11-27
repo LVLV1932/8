@@ -44,16 +44,16 @@
   --popover: 0 0% 100%;
   --popover-foreground: 210 30% 12%;
   
-  /* Vibrant Blue (Primary) - School Brand */
-  --primary: 217 91% 50%; /* #2563eb - Better blue */
+  /* Deep Navy Blue (Primary) - Dark shade */
+  --primary: 217 91% 30%; /* #0c47a1 - deep blue */
   --primary-foreground: 0 0% 100%;
   
-  /* Vibrant Purple (Secondary) - Accent Color */
-  --secondary: 280 85% 55%; /* #a855f7 - beautiful purple */
+  /* Vibrant Blue (Secondary) - Medium shade */
+  --secondary: 217 91% 50%; /* #2563eb - vibrant blue */
   --secondary-foreground: 0 0% 100%;
   
-  /* Accent Green - From Logo */
-  --accent: 130 60% 40%; /* #22b366 - green accent */
+  /* Sky Blue (Accent) - Light shade */
+  --accent: 217 91% 65%; /* #60a5fa - sky blue */
   --accent-foreground: 0 0% 100%;
   
   --muted: 210 20% 95%;
@@ -79,13 +79,13 @@
   --popover: 210 40% 12%;
   --popover-foreground: 210 20% 95%;
   
-  --primary: 217 91% 60%;
+  --primary: 217 91% 40%;
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 280 85% 60%;
+  --secondary: 217 91% 55%;
   --secondary-foreground: 0 0% 100%;
   
-  --accent: 130 60% 50%;
+  --accent: 217 91% 70%;
   --accent-foreground: 0 0% 100%;
   
   --muted: 210 30% 20%;
