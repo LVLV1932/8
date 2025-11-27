@@ -1,0 +1,720 @@
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #ffffff;
+    --glass-background: rgba(255, 255, 255, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    --text-color-light: #f0f0f0;
+    --text-color-dark: #333;
+}
+
+body {
+    font-family: 'Tajawal', sans-serif;
+    background: linear-gradient(135deg, #1d2141, #3a3b63, #4a5482);
+    color: var(--text-color-light);
+    direction: rtl;
+    text-align: right;
+    line-height: 1.6;
+    animation: gradient-animation 10s ease infinite;
+    background-size: 200% 200%;
+}
+
+@keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+header {
+    background: var(--glass-background);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--glass-shadow);
+    z-index: 1000;
+    position: sticky;
+    top: 0;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-color-light);
+}
+
+.logo-container .logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+}
+
+.logo-container h1 a {
+    color: var(--secondary-color);
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.main-nav {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.nav-link {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    padding: 12px 20px;
+    border-radius: 50px;
+    color: var(--text-color-light);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: transform 0.3s, background 0.3s;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link:hover, .nav-link.active {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.nav-link.login-btn {
+    background: var(--primary-color);
+    border: none;
+    color: var(--secondary-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.nav-tools {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.nav-tool-btn {
+    background: var(--glass-background);
+    backdrop-filter: blur(5px);
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    box-shadow: var(--glass-shadow);
+    color: var(--text-color-light);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: transform 0.3s, background 0.3s;
+}
+
+.nav-tool-btn:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.menu-toggle {
+    display: none;
+}
+
+/* ... باقي أكواد CSS ... */
+
+/* --- Hero Section (Video/Image) --- */
+.video-hero {
+    position: relative;
+    width: 100%;
+    height: 70vh; /* ارتفاع الشاشة البداية */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-color-light);
+    margin-bottom: 40px;
+    border-radius: 15px;
+    box-shadow: var(--glass-shadow);
+}
+
+/* **التعديل هنا: لضمان تطبيق نمط الفيديو على الصورة الجديدة أيضًا** */
+.video-hero video, .video-hero img { 
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* مهم لضمان تغطية العنصر للمنطقة دون تشويه */
+    z-index: 0; 
+}
+
+/* ... باقي أكواد CSS ... */
+
+.video-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.video-hero video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #fff;
+    padding: 2rem;
+}
+
+.video-overlay h1 {
+    font-size: 3rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    animation: fadeInDown 1s ease-out;
+}
+
+.video-overlay p {
+    font-size: 1.2rem;
+    margin: 1rem 0;
+    animation: fadeInUp 1s ease-out 0.5s;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+main {
+    padding: 2rem 5%;
+}
+
+section {
+    margin-bottom: 4rem;
+}
+
+.section-card, .card {
+    background: var(--glass-background);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: right;
+    margin-bottom: 2rem;
+}
+
+.section-card:hover, .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 64px 0 rgba(31, 38, 135, 0.37);
+}
+
+.btn {
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    border: none;
+}
+.btn.btn-block {
+    width: 100%;
+    justify-content: center;
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.primary-btn:hover {
+    transform: scale(1.05);
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    color: var(--primary-color);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: var(--glass-shadow);
+}
+
+.secondary-btn:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.gallery-grid, .articles-grid, .teachers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.gallery-item, .article-card, .teacher-card {
+    background: var(--glass-background);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.3s;
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-color-light);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 15px;
+    border: 1px solid var(--glass-border);
+}
+
+.article-card h4 {
+    color: var(--primary-color);
+}
+
+.teacher-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border: 3px solid var(--glass-border);
+}
+
+.teacher-card h4 {
+    color: var(--primary-color);
+}
+
+.admin-main {
+    padding: 2rem 5%;
+}
+
+.admin-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.admin-tabs .tab-btn {
+    background: var(--glass-background);
+    backdrop-filter: blur(5px);
+    padding: 1rem 2rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    box-shadow: var(--glass-shadow);
+    color: var(--text-color-light);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: transform 0.3s, background 0.3s;
+}
+
+.admin-tabs .tab-btn.active, .admin-tabs .tab-btn:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.admin-content .tab-pane {
+    display: none;
+}
+
+.admin-content .tab-pane.active {
+    display: block;
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+.input-group label i {
+    margin-left: 8px;
+}
+
+.input-group input[type="text"],
+.input-group input[type="file"],
+.input-group input[type="password"],
+.input-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    color: var(--text-color-light);
+    text-align: right;
+    font-family: 'Tajawal', sans-serif;
+    outline: none;
+}
+.input-group input[type="text"]:focus,
+.input-group input[type="password"]:focus,
+.input-group textarea:focus {
+    border-color: var(--primary-color);
+}
+.input-group input[type="file"]::-webkit-file-upload-button {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    color: var(--text-color-light);
+    padding: 8px 15px;
+    cursor: pointer;
+}
+.input-group input[type="file"]::-webkit-file-upload-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+
+.content-list {
+    margin-top: 2rem;
+}
+
+.content-item {
+    background: var(--glass-background);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.content-item .action-buttons button {
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    color: var(--secondary-color);
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.3s;
+    margin-right: 5px;
+}
+.content-item .action-buttons button:hover {
+    transform: scale(1.1);
+}
+
+.content-item .action-buttons .edit-btn {
+    background-color: #ffc107;
+}
+.content-item .action-buttons .delete-btn {
+    background-color: #dc3545;
+}
+
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-card {
+    background: var(--glass-background);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+}
+.text-center {
+    text-align: center;
+}
+.forgot-password {
+    display: block;
+    margin-top: 1rem;
+    color: var(--text-color-light);
+    transition: color 0.3s;
+}
+.forgot-password:hover {
+    color: var(--primary-color);
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+footer {
+    background: var(--glass-background);
+    backdrop-filter: blur(10px);
+    color: var(--secondary-color);
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-radius: 20px 20px 0 0;
+    box-shadow: var(--glass-shadow);
+}
+
+.social-icons a {
+    color: var(--secondary-color);
+    font-size: 1.5rem;
+    margin: 0 10px;
+}
+.social-icons a:hover {
+    color: var(--primary-color);
+}
+
+.modal {
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background: var(--glass-background);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    color: var(--text-color-light);
+    padding: 2rem;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    box-shadow: var(--glass-shadow);
+}
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    color: var(--text-color-light);
+    font-size: 2rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+.close-modal:hover {
+    color: var(--primary-color);
+}
+
+.chatbot-icon {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    transition: transform 0.3s;
+}
+.chatbot-icon:hover {
+    transform: scale(1.1);
+}
+.chatbot-container {
+    position: fixed;
+    bottom: 90px;
+    left: 20px;
+    width: 350px;
+    height: 450px;
+    background: var(--glass-background);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 998;
+    transform: translateY(100%) scale(0.5);
+    opacity: 0;
+    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+    transform-origin: bottom left;
+}
+.chatbot-container.active {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+.chatbot-header {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+    border-radius: 20px 20px 0 0;
+}
+.chatbot-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+.chatbot-header .close-btn {
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+.chatbot-body {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.chatbot-body::-webkit-scrollbar {
+    width: 8px;
+}
+.chatbot-body::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 10px;
+}
+.message {
+    padding: 10px 15px;
+    border-radius: 15px;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+.bot-message {
+    background: rgba(255, 255, 255, 0.1);
+    align-self: flex-start;
+    color: var(--text-color-light);
+}
+.user-message {
+    background: var(--primary-color);
+    align-self: flex-end;
+    color: var(--secondary-color);
+}
+.chatbot-input {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+}
+.chatbot-input input {
+    flex-grow: 1;
+    border: none;
+    background: transparent;
+    padding: 10px;
+    border-radius: 5px;
+    color: var(--text-color-light);
+    outline: none;
+}
+.chatbot-input input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+.chatbot-input button {
+    background: transparent;
+    border: none;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.chatbot-input button:hover {
+    transform: scale(1.1);
+}
+
+/* Dark Mode Adaptation */
+body.dark-mode {
+    background: linear-gradient(135deg, #0f101a, #1a1a2e, #2a2a4a);
+    color: var(--text-color-light);
+}
+
+@media (max-width: 768px) {
+    .main-nav {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        position: absolute;
+        top: 80px;
+        right: 0;
+        background: rgba(29, 33, 65, 0.9);
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .main-nav.active {
+        display: flex;
+    }
+    .menu-toggle {
+        display: block;
+        background: none;
+        border: none;
+        color: var(--text-color-light);
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+    header {
+        flex-wrap: wrap;
+    }
+    .nav-tools {
+        margin-right: auto;
+    }
+    .chatbot-container {
+        width: 90%;
+        left: 5%;
+        right: 5%;
+        bottom: 90px;
+    }
+    .chatbot-icon {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .chatbot-icon:hover {
+        transform: translateX(-50%) scale(1.1);
+    }
+    
+    /* قواعد إضافية للمقالات على الهواتف */
+    .articles-grid {
+        grid-template-columns: 1fr;
+        /* تعديل المسافة بين البطاقات على الهاتف */
+        gap: 1rem;
+    }
+
+    /* تعديل المقاسات الداخلية لبطاقة المقالة على الهاتف */
+    .article-card {
+        padding: 1rem;
+    }
+}

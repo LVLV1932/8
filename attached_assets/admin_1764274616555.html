@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة</title>
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="شعار المدرسة" class="logo">
+            <h1><a href="index.html">لوحة الإدارة</a></h1>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> الموقع</a>
+            <a href="login.html" class="nav-link logout-btn"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</a>
+        </nav>
+        <div class="nav-tools">
+            <button id="mode-toggle" class="nav-tool-btn"><i class="fas fa-sun"></i></button>
+            <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="admin-tabs">
+            <button class="tab-btn active" data-target="manage-images"><i class="fas fa-images"></i> إدارة الصور</button>
+            <button class="tab-btn" data-target="manage-articles"><i class="fas fa-file-alt"></i> إدارة المقالات</button>
+            <button class="tab-btn" data-target="manage-teachers"><i class="fas fa-chalkboard-teacher"></i> إدارة المدرسين</button>
+        </div>
+
+        <div class="admin-content">
+            <div id="manage-images" class="tab-pane active">
+                <div class="admin-card card">
+                    <h3>إضافة صورة جديدة</h3>
+                    <form id="add-image-form">
+                        <div class="input-group">
+                            <label for="image-file"><i class="fas fa-upload"></i> اختر صورة:</label>
+                            <input type="file" id="image-file" name="image-file" accept="image/*" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="image-alt"><i class="fas fa-tag"></i> نص بديل (Alt):</label>
+                            <input type="text" id="image-alt" name="image-alt" required>
+                        </div>
+                        <button type="submit" class="btn primary-btn"><i class="fas fa-plus"></i> إضافة</button>
+                    </form>
+                </div>
+                <div class="admin-card card">
+                    <h3>الصور الموجودة</h3>
+                    <div id="admin-image-list" class="content-list">
+                        </div>
+                </div>
+            </div>
+
+            <div id="manage-articles" class="tab-pane">
+                <div class="admin-card card">
+                    <h3>إضافة مقال جديد</h3>
+                    <form id="add-article-form">
+                        <div class="input-group">
+                            <label for="article-title"><i class="fas fa-heading"></i> عنوان المقال:</label>
+                            <input type="text" id="article-title" name="article-title" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="article-content"><i class="fas fa-align-left"></i> محتوى المقال:</label>
+                            <textarea id="article-content" name="article-content" rows="10" required></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="article-image"><i class="fas fa-image"></i> صورة المقال:</label>
+                            <input type="file" id="article-image" name="article-image" accept="image/*" required>
+                        </div>
+                        <button type="submit" class="btn primary-btn"><i class="fas fa-plus"></i> إضافة</button>
+                    </form>
+                </div>
+                <div class="admin-card card">
+                    <h3>المقالات الموجودة</h3>
+                    <div id="admin-articles-list" class="content-list">
+                        </div>
+                </div>
+            </div>
+
+            <div id="manage-teachers" class="tab-pane">
+                <div class="admin-card card">
+                    <h3>إضافة مدرس جديد</h3>
+                    <form id="add-teacher-form">
+                        <div class="input-group">
+                            <label for="teacher-name"><i class="fas fa-user-tag"></i> اسم المدرس:</label>
+                            <input type="text" id="teacher-name" name="teacher-name" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="teacher-position"><i class="fas fa-briefcase"></i> المنصب:</label>
+                            <input type="text" id="teacher-position" name="teacher-position" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="teacher-bio"><i class="fas fa-file-signature"></i> نبذة عن المدرس:</label>
+                            <textarea id="teacher-bio" name="teacher-bio" rows="5" required></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="teacher-image"><i class="fas fa-image"></i> صورة المدرس:</label>
+                            <input type="file" id="teacher-image" name="teacher-image" accept="image/*" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="checkbox" id="is-director" name="is-director">
+                            <label for="is-director" style="display: inline-block;"><i class="fas fa-user-tie"></i> تعيين كمدير</label>
+                        </div>
+                        <button type="submit" class="btn primary-btn"><i class="fas fa-plus"></i> إضافة</button>
+                    </form>
+                </div>
+                <div class="admin-card card">
+                    <h3>المدرسون الموجودون</h3>
+                    <div id="admin-teachers-list" class="content-list">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="edit-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>تعديل المحتوى</h3>
+
+                <form id="edit-image-form" style="display:none;">
+                    <div class="input-group">
+                        <label for="edit-image-alt">نص بديل جديد:</label>
+                        <input type="text" id="edit-image-alt">
+                    </div>
+                    <div class="input-group">
+                        <label for="edit-image-file">صورة جديدة (اختياري):</label>
+                        <input type="file" id="edit-image-file" accept="image/*">
+                        <img id="edit-image-preview" src="" alt="صورة سابقة" style="width: 100px; height: auto; margin-top: 10px;">
+                    </div>
+                    <button type="submit" class="btn primary-btn">حفظ التعديلات</button>
+                </form>
+
+                <form id="edit-article-form" style="display:none;">
+                    <div class="input-group">
+                        <label for="edit-article-title">عنوان جديد:</label>
+                        <input type="text" id="edit-article-title">
+                    </div>
+                    <div class="input-group">
+                        <label for="edit-article-content">محتوى جديد:</label>
+                        <textarea id="edit-article-content" rows="10"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="edit-article-image">صورة جديدة (اختياري):</label>
+                        <input type="file" id="edit-article-image" accept="image/*">
+                        <img id="edit-article-preview" src="" alt="صورة سابقة" style="width: 100px; height: auto; margin-top: 10px;">
+                    </div>
+                    <button type="submit" class="btn primary-btn">حفظ التعديلات</button>
+                </form>
+
+                <form id="edit-teacher-form" style="display:none;">
+                    <div class="input-group">
+                        <label for="edit-teacher-name">اسم جديد:</label>
+                        <input type="text" id="edit-teacher-name">
+                    </div>
+                    <div class="input-group">
+                        <label for="edit-teacher-position">منصب جديد:</label>
+                        <input type="text" id="edit-teacher-position">
+                    </div>
+                    <div class="input-group">
+                        <label for="edit-teacher-bio">نبذة جديدة:</label>
+                        <textarea id="edit-teacher-bio" rows="5"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="edit-teacher-image">صورة جديدة (اختياري):</label>
+                        <input type="file" id="edit-teacher-image" accept="image/*">
+                        <img id="edit-teacher-preview" src="" alt="صورة سابقة" style="width: 100px; height: auto; border-radius: 50%; margin-top: 10px;">
+                    </div>
+                    <div class="input-group">
+                        <input type="checkbox" id="edit-is-director">
+                        <label for="edit-is-director" style="display: inline-block;">تعيين كمدير</label>
+                    </div>
+                    <button type="submit" class="btn primary-btn">حفظ التعديلات</button>
+                </form>
+
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>جميع الحقوق محفوظة لـ Ahmed Hassan © 2024</p>
+        <div class="social-icons">
+            <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

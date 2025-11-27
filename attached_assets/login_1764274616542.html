@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - ثانوية الزبير للمتفوقين</title>
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="شعار المدرسة" class="logo">
+            <h1><a href="index.html">ثانوية الزبير للمتفوقين</a></h1>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a>
+            <a href="about.html" class="nav-link"><i class="fas fa-school"></i> عن المدرسة</a>
+            <a href="programs.html" class="nav-link"><i class="fas fa-book-open"></i> برامجنا</a>
+            <a href="teachers.html" class="nav-link"><i class="fas fa-chalkboard-teacher"></i> المدرسون</a>
+            <a href="contact.html" class="nav-link"><i class="fas fa-envelope"></i> تواصل معنا</a>
+            <a href="login.html" class="nav-link active login-btn"><i class="fas fa-user-circle"></i> </a>
+        </nav>
+        <div class="nav-tools">
+            <button id="mode-toggle" class="nav-tool-btn"><i class="fas fa-sun"></i></button>
+            <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <main>
+        <section class="login-section card">
+            <h2>تسجيل الدخول للوحة الإدارة</h2>
+            <p style="color: #f06a6a; font-weight: bold;">تنبيه: اسم المستخدم: admin | كلمة المرور: Zubair@2025#Secure</p>
+            <h3><i class="fas fa-user-lock"></i> الدخول الآمن</h3>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="username"><i class="fas fa-user"></i> اسم المستخدم</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password"><i class="fas fa-key"></i> كلمة المرور</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn primary-btn"><i class="fas fa-sign-in-alt"></i> دخول</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>جميع الحقوق محفوظة لـ Ahmed Hassan © 2024</p>
+        <div class="social-icons">
+            <a href="https://web.facebook.com/jumaaalkhafaji74?_rdc=1&_rdr#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/alzubair_school/" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
+    </footer>
+    
+    <script src="script.js"></script>
+    <script>
+        // متغيرات الأمان لتتبع المحاولات وتطبيق القفل المؤقت (Rate Limiting)
+        let failedAttempts = 0;
+        const maxAttempts = 5; // الحد الأقصى للمحاولات الفاشلة
+        const lockDuration = 60000; // قفل لمدة 60 ثانية (ملي ثانية)
+        let isLocked = false;
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            if (isLocked) {
+                alert('تم قفل الحساب مؤقتاً بسبب المحاولات الفاشلة المتكررة. يرجى المحاولة بعد قليل.');
+                return;
+            }
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // بيانات الدخول الجديدة
+            const correctUsername = 'admin';
+            const correctPassword = 'Zubair@2025#Secure'; 
+            
+            if (username === correctUsername && password === correctPassword) {
+                // نجاح تسجيل الدخول
+                sessionStorage.setItem('adminLoggedIn', 'true'); // حفظ حالة الدخول
+                failedAttempts = 0; // إعادة تعيين عدد المحاولات
+                window.location.href = 'admin.html';
+            } else {
+                // فشل تسجيل الدخول - تطبيق تحسينات الأمان
+                failedAttempts++;
+                
+                if (failedAttempts < maxAttempts) {
+                    alert('اسم المستخدم أو كلمة المرور غير صحيحة. المحاولات المتبقية: ' + (maxAttempts - failedAttempts));
+                }
+
+                if (failedAttempts >= maxAttempts) {
+                    isLocked = true;
+                    // تفعيل القفل في حقول الإدخال وزر الدخول
+                    document.getElementById('username').disabled = true;
+                    document.getElementById('password').disabled = true;
+                    document.querySelector('.primary-btn').disabled = true;
+                    alert('⚠️ تنبيه أمني: تم قفل الحساب لمدة دقيقة بسبب كثرة المحاولات الفاشلة.');
+
+                    // مؤقت لإلغاء القفل بعد المدة المحددة
+                    setTimeout(() => {
+                        isLocked = false;
+                        failedAttempts = 0;
+                        document.getElementById('username').disabled = false;
+                        document.getElementById('password').disabled = false;
+                        document.querySelector('.primary-btn').disabled = false;
+                        alert('✅ تم إلغاء قفل الحساب، يمكنك المحاولة مجدداً.');
+                    }, lockDuration);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
