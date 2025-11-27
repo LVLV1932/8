@@ -14,6 +14,9 @@ import Contact from "@/pages/contact";
 import Login from "@/pages/login";
 import Admin from "@/pages/admin";
 import Articles from "@/pages/articles";
+import Signup from "@/pages/signup";
+import StudentDashboard from "@/pages/student-dashboard";
+import StudentQA from "@/pages/student-qa";
 
 function Router() {
   return (
@@ -26,6 +29,9 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/login" component={Login} />
       <Route path="/admin" component={Admin} />
+      <Route path="/signup" component={Signup} />
+      <Route path="/student-dashboard" component={StudentDashboard} />
+      <Route path="/student-qa" component={StudentQA} />
       <Route component={NotFound} />
     </Switch>
   );

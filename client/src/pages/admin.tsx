@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocation } from "wouter";
-import { Plus, Trash, Edit, Image as ImageIcon, FileText, Users, Settings, Save, LogOut, BookOpen, CheckCircle, AlertCircle, X } from "lucide-react";
-import { useSchool, Teacher, Program, Article } from "@/lib/store";
+import { Plus, Trash, Edit, Image as ImageIcon, FileText, Users, Settings, Save, LogOut, BookOpen, CheckCircle, AlertCircle, X, MessageSquare, Key } from "lucide-react";
+import { useSchool, Teacher, Program, Article, ClassCode, Question } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -20,18 +20,23 @@ export default function Admin() {
     config, updateConfig, 
     teachers, addTeacher, updateTeacher, deleteTeacher, 
     programs, addProgram, updateProgram, deleteProgram,
-    articles, addArticle, updateArticle, deleteArticle
+    articles, addArticle, updateArticle, deleteArticle,
+    classCodes, addClassCode, updateClassCode, deleteClassCode,
+    questions, answerQuestion, deleteQuestion
   } = useSchool();
 
   // Local state for forms
   const [newTeacher, setNewTeacher] = useState({ name: "", subject: "", role: "", bio: "" });
   const [newProgram, setNewProgram] = useState({ title: "", desc: "", icon: "BookOpen" });
-  const [newArticle, setNewArticle] = useState({ title: "", content: "", author: "" });
+  const [newArticle, setNewArticle] = useState({ title: "", content: "", author: "", forStudents: false });
+  const [newClassCode, setNewClassCode] = useState({ grade: "", code: "", description: "" });
+  const [answerText, setAnswerText] = useState("");
 
   // Edit States
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [editingClassCode, setEditingClassCode] = useState<ClassCode | null>(null);
 
   const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,6 +180,22 @@ export default function Admin() {
                 >
                   <div className="flex items-center gap-2">
                     <ImageIcon size={16}/> الوسائط
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="classes" 
+                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    <Key size={16}/> أكواد الصفوف
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="questions" 
+                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    <MessageSquare size={16}/> أسئلة الطلاب
                   </div>
                 </TabsTrigger>
               </TabsList>
@@ -663,6 +684,115 @@ export default function Admin() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="classes" className="mt-0">
+                <div className="grid lg:grid-cols-12 gap-8">
+                  <div className="lg:col-span-4">
+                    <div className="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                      <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                        <Plus size={18} className="text-secondary" /> إضافة كود صف
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>الصف</Label>
+                          <Input 
+                            value={newClassCode.grade}
+                            onChange={e => setNewClassCode({...newClassCode, grade: e.target.value})}
+                            placeholder="الأول الثانوي"
+                            className="bg-background"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>الكود</Label>
+                          <Input 
+                            value={newClassCode.code}
+                            onChange={e => setNewClassCode({...newClassCode, code: e.target.value})}
+                            placeholder="ZUBAIR-6001"
+                            className="bg-background"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>الوصف</Label>
+                          <Input 
+                            value={newClassCode.description}
+                            onChange={e => setNewClassCode({...newClassCode, description: e.target.value})}
+                            placeholder="وصف الصف"
+                            className="bg-background"
+                          />
+                        </div>
+                        <Button onClick={() => {
+                          if(newClassCode.grade && newClassCode.code) {
+                            addClassCode(newClassCode);
+                            setNewClassCode({grade: "", code: "", description: ""});
+                            toast({title: "تم إضافة الكود بنجاح"});
+                          }
+                        }} className="w-full gap-2 mt-2">إضافة</Button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="lg:col-span-8">
+                    <h3 className="text-lg font-bold text-primary mb-4">أكواد الصفوف</h3>
+                    <div className="space-y-3">
+                      {classCodes.map((cc) => (
+                        <motion.div key={cc.id} layout initial={{opacity: 0}} animate={{opacity: 1}} className="bg-background border rounded-xl p-4 flex justify-between items-center group hover:border-secondary/50 transition-all">
+                          <div>
+                            <h4 className="font-bold text-primary">{cc.grade}</h4>
+                            <p className="text-sm text-muted-foreground">{cc.code}</p>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => {if(confirm('حذف؟')) deleteClassCode(cc.id); toast({title: "تم الحذف"});}}>
+                              <Trash size={16}/>
+                            </Button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="questions" className="mt-0">
+                <div>
+                  <h3 className="text-lg font-bold text-primary mb-6">أسئلة الطلاب</h3>
+                  <div className="space-y-4">
+                    {questions.map((q) => (
+                      <motion.div key={q.id} layout initial={{opacity: 0}} animate={{opacity: 1}} className="bg-background border rounded-xl p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex-1">
+                            <p className="font-bold text-primary mb-1">{q.studentName}</p>
+                            <p className="text-sm text-muted-foreground mb-3">{q.question}</p>
+                            <p className="text-xs text-muted-foreground">البريد: {q.studentEmail}</p>
+                          </div>
+                          {q.answered && <div className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1"><CheckCircle size={14}/> مجابة</div>}
+                        </div>
+                        {q.answered && q.answer && (
+                          <div className="bg-green-50 p-3 rounded-lg mb-4 border border-green-200">
+                            <p className="text-xs font-medium text-green-900 mb-1">الإجابة:</p>
+                            <p className="text-sm text-green-800">{q.answer}</p>
+                          </div>
+                        )}
+                        {!q.answered && (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm" className="gap-2">الإجابة</Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader><DialogTitle>الإجابة على السؤال</DialogTitle></DialogHeader>
+                              <Textarea placeholder="اكتب الإجابة هنا..." rows={4} value={answerText} onChange={e => setAnswerText(e.target.value)} />
+                              <Button onClick={() => {
+                                answerQuestion(q.id, answerText);
+                                setAnswerText("");
+                                toast({title: "تم إرسال الإجابة"});
+                              }} className="w-full">إرسال الإجابة</Button>
+                            </DialogContent>
+                          </Dialog>
+                        )}
+                        <Button variant="ghost" size="sm" onClick={() => deleteQuestion(q.id)} className="text-destructive">حذف</Button>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               </TabsContent>

@@ -14,7 +14,7 @@ export type Program = {
   id: number;
   title: string;
   desc: string;
-  icon: string; // Store icon name as string
+  icon: string;
 };
 
 export type Article = {
@@ -24,6 +24,33 @@ export type Article = {
   image?: string;
   date: string;
   author?: string;
+  forStudents?: boolean;
+};
+
+export type ClassCode = {
+  id: number;
+  grade: string;
+  code: string;
+  description: string;
+};
+
+export type Student = {
+  id: number;
+  name: string;
+  email: string;
+  grade: string;
+  classCode: string;
+  joinDate: string;
+};
+
+export type Question = {
+  id: number;
+  studentName: string;
+  studentEmail: string;
+  question: string;
+  answer?: string;
+  date: string;
+  answered: boolean;
 };
 
 export type SchoolConfig = {
@@ -42,17 +69,46 @@ type SchoolContextType = {
   teachers: Teacher[];
   programs: Program[];
   articles: Article[];
+  classCodes: ClassCode[];
+  students: Student[];
+  questions: Question[];
   config: SchoolConfig;
+  currentStudent: Student | null;
+  
+  // Teacher actions
   addTeacher: (teacher: Omit<Teacher, "id">) => void;
   updateTeacher: (teacher: Teacher) => void;
   deleteTeacher: (id: number) => void;
+  
+  // Program actions
   addProgram: (program: Omit<Program, "id">) => void;
   updateProgram: (program: Program) => void;
   deleteProgram: (id: number) => void;
-  updateConfig: (config: Partial<SchoolConfig>) => void;
+  
+  // Article actions
   addArticle: (article: Omit<Article, "id" | "date">) => void;
   updateArticle: (article: Article) => void;
   deleteArticle: (id: number) => void;
+  
+  // ClassCode actions
+  addClassCode: (classCode: Omit<ClassCode, "id">) => void;
+  updateClassCode: (classCode: ClassCode) => void;
+  deleteClassCode: (id: number) => void;
+  
+  // Student actions
+  registerStudent: (student: Omit<Student, "id" | "joinDate">) => void;
+  loginStudent: (email: string, classCode: string) => boolean;
+  logoutStudent: () => void;
+  updateStudent: (student: Student) => void;
+  deleteStudent: (id: number) => void;
+  
+  // Question actions
+  addQuestion: (question: Omit<Question, "id" | "date" | "answered">) => void;
+  answerQuestion: (id: number, answer: string) => void;
+  deleteQuestion: (id: number) => void;
+  
+  // Config actions
+  updateConfig: (config: Partial<SchoolConfig>) => void;
 };
 
 const SchoolContext = createContext<SchoolContextType | undefined>(undefined);
@@ -88,6 +144,12 @@ const initialArticles: Article[] = [
   }
 ];
 
+const initialClassCodes: ClassCode[] = [
+  { id: 1, grade: "الأول الثانوي", code: "ZUBAIR-6001", description: "الصف الأول الثانوي" },
+  { id: 2, grade: "الثاني الثانوي", code: "ZUBAIR-6002", description: "الصف الثاني الثانوي" },
+  { id: 3, grade: "الثالث الثانوي", code: "ZUBAIR-6003", description: "الصف الثالث الثانوي" },
+];
+
 const initialConfig: SchoolConfig = {
   name: "ثانوية الزبير للمتفوقين",
   description: "صرح علمي لبناء قادة المستقبل",
@@ -101,7 +163,6 @@ const initialConfig: SchoolConfig = {
 };
 
 export function SchoolProvider({ children }: { children: React.ReactNode }) {
-  // Initialize state from localStorage or defaults
   const [teachers, setTeachers] = useState<Teacher[]>(() => {
     if (typeof window === 'undefined') return initialTeachers;
     const saved = localStorage.getItem("school_teachers");
@@ -120,23 +181,55 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     return saved ? JSON.parse(saved) : initialArticles;
   });
 
+  const [classCodes, setClassCodes] = useState<ClassCode[]>(() => {
+    if (typeof window === 'undefined') return initialClassCodes;
+    const saved = localStorage.getItem("school_classCodes");
+    return saved ? JSON.parse(saved) : initialClassCodes;
+  });
+
+  const [students, setStudents] = useState<Student[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem("school_students");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [questions, setQuestions] = useState<Question[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem("school_questions");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [config, setConfig] = useState<SchoolConfig>(() => {
     if (typeof window === 'undefined') return initialConfig;
     const saved = localStorage.getItem("school_config");
     return saved ? JSON.parse(saved) : initialConfig;
   });
 
-  // Persist to localStorage whenever state changes
+  const [currentStudent, setCurrentStudent] = useState<Student | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const saved = localStorage.getItem("current_student");
+    return saved ? JSON.parse(saved) : null;
+  });
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem("school_teachers", JSON.stringify(teachers));
       localStorage.setItem("school_programs", JSON.stringify(programs));
       localStorage.setItem("school_articles", JSON.stringify(articles));
+      localStorage.setItem("school_classCodes", JSON.stringify(classCodes));
+      localStorage.setItem("school_students", JSON.stringify(students));
+      localStorage.setItem("school_questions", JSON.stringify(questions));
       localStorage.setItem("school_config", JSON.stringify(config));
     }
-  }, [teachers, programs, articles, config]);
+  }, [teachers, programs, articles, classCodes, students, questions, config]);
 
-  // Actions
+  useEffect(() => {
+    if (typeof window !== 'undefined' && currentStudent) {
+      localStorage.setItem("current_student", JSON.stringify(currentStudent));
+    }
+  }, [currentStudent]);
+
+  // Teacher actions
   const addTeacher = (teacher: Omit<Teacher, "id">) => {
     setTeachers(prev => [...prev, { ...teacher, id: Date.now() }]);
   };
@@ -149,6 +242,7 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     setTeachers(prev => prev.filter(t => t.id !== id));
   };
 
+  // Program actions
   const addProgram = (program: Omit<Program, "id">) => {
     setPrograms(prev => [...prev, { ...program, id: Date.now() }]);
   };
@@ -161,10 +255,7 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     setPrograms(prev => prev.filter(p => p.id !== id));
   };
 
-  const updateConfig = (newConfig: Partial<SchoolConfig>) => {
-    setConfig(prev => ({ ...prev, ...newConfig }));
-  };
-
+  // Article actions
   const addArticle = (article: Omit<Article, "id" | "date">) => {
     setArticles(prev => [...prev, { 
       ...article, 
@@ -181,13 +272,91 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     setArticles(prev => prev.filter(a => a.id !== id));
   };
 
+  // ClassCode actions
+  const addClassCode = (classCode: Omit<ClassCode, "id">) => {
+    setClassCodes(prev => [...prev, { ...classCode, id: Date.now() }]);
+  };
+
+  const updateClassCode = (updated: ClassCode) => {
+    setClassCodes(prev => prev.map(c => c.id === updated.id ? updated : c));
+  };
+
+  const deleteClassCode = (id: number) => {
+    setClassCodes(prev => prev.filter(c => c.id !== id));
+  };
+
+  // Student actions
+  const registerStudent = (student: Omit<Student, "id" | "joinDate">) => {
+    const newStudent: Student = {
+      ...student,
+      id: Date.now(),
+      joinDate: new Date().toLocaleDateString('ar-EG')
+    };
+    setStudents(prev => [...prev, newStudent]);
+  };
+
+  const loginStudent = (email: string, classCode: string) => {
+    const student = students.find(s => s.email === email && s.classCode === classCode);
+    if (student) {
+      setCurrentStudent(student);
+      return true;
+    }
+    return false;
+  };
+
+  const logoutStudent = () => {
+    setCurrentStudent(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("current_student");
+    }
+  };
+
+  const updateStudent = (updated: Student) => {
+    setStudents(prev => prev.map(s => s.id === updated.id ? updated : s));
+    if (currentStudent?.id === updated.id) {
+      setCurrentStudent(updated);
+    }
+  };
+
+  const deleteStudent = (id: number) => {
+    setStudents(prev => prev.filter(s => s.id !== id));
+    if (currentStudent?.id === id) {
+      logoutStudent();
+    }
+  };
+
+  // Question actions
+  const addQuestion = (question: Omit<Question, "id" | "date" | "answered">) => {
+    setQuestions(prev => [...prev, {
+      ...question,
+      id: Date.now(),
+      date: new Date().toLocaleDateString('ar-EG'),
+      answered: false
+    }]);
+  };
+
+  const answerQuestion = (id: number, answer: string) => {
+    setQuestions(prev => prev.map(q => q.id === id ? { ...q, answer, answered: true } : q));
+  };
+
+  const deleteQuestion = (id: number) => {
+    setQuestions(prev => prev.filter(q => q.id !== id));
+  };
+
+  const updateConfig = (newConfig: Partial<SchoolConfig>) => {
+    setConfig(prev => ({ ...prev, ...newConfig }));
+  };
+
   return (
     <SchoolContext.Provider value={{
-      teachers, programs, articles, config,
+      teachers, programs, articles, classCodes, students, questions, config, currentStudent,
       addTeacher, updateTeacher, deleteTeacher,
       addProgram, updateProgram, deleteProgram,
-      updateConfig,
-      addArticle, updateArticle, deleteArticle
+      addArticle, updateArticle, deleteArticle,
+      addClassCode, updateClassCode, deleteClassCode,
+      registerStudent, loginStudent, logoutStudent, updateStudent, deleteStudent,
+      addQuestion, answerQuestion, deleteQuestion,
+      updateConfig
     }}>
       {children}
     </SchoolContext.Provider>
