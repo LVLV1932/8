@@ -48,8 +48,8 @@
   --primary: 217 91% 50%; /* #2563eb - Better blue */
   --primary-foreground: 0 0% 100%;
   
-  /* Vibrant Red (Secondary) - From Logo */
-  --secondary: 0 85% 50%; /* #ff4444 - bright red accent */
+  /* Vibrant Purple (Secondary) - Accent Color */
+  --secondary: 280 85% 55%; /* #a855f7 - beautiful purple */
   --secondary-foreground: 0 0% 100%;
   
   /* Accent Green - From Logo */
@@ -82,7 +82,7 @@
   --primary: 217 91% 60%;
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 0 85% 55%;
+  --secondary: 280 85% 60%;
   --secondary-foreground: 0 0% 100%;
   
   --accent: 130 60% 50%;
