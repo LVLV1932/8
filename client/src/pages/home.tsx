@@ -3,11 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, FlaskConical, Trophy, Users } from "lucide-react";
+import { ArrowLeft, BookOpen, FlaskConical, Trophy } from "lucide-react";
 import heroImage from "@assets/generated_images/modern_high_school_exterior_architecture.png";
 import abstractBg from "@assets/generated_images/abstract_academic_background.png";
+import { useSchool } from "@/lib/store";
 
 export default function Home() {
+  const { config } = useSchool();
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -15,7 +18,7 @@ export default function Home() {
         <div className="absolute inset-0 z-0">
           <img 
             src={heroImage} 
-            alt="Al Zubair High School" 
+            alt={config.name} 
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/60 mix-blend-multiply" />
@@ -28,9 +31,9 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              ثانوية الزبير للمتفوقين
+              {config.name}
               <br />
-              <span className="text-secondary">صرح علمي لبناء قادة المستقبل</span>
+              <span className="text-secondary">{config.description}</span>
             </h1>
             <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto text-white/90">
               نجمع بين التميز الأكاديمي وبناء الشخصية القيادية في بيئة تعليمية محفزة ومبتكرة
@@ -55,19 +58,19 @@ export default function Home() {
       <section className="py-8 bg-secondary text-secondary-foreground">
         <div className="container mx-auto px-4 flex flex-wrap justify-center gap-12 md:gap-24 text-center">
           <div>
-            <div className="text-4xl font-bold mb-1">500+</div>
+            <div className="text-4xl font-bold mb-1">{config.studentCount}+</div>
             <div className="text-sm font-semibold opacity-80">طالب متفوق</div>
           </div>
           <div>
-            <div className="text-4xl font-bold mb-1">50+</div>
+            <div className="text-4xl font-bold mb-1">{config.teacherCount}+</div>
             <div className="text-sm font-semibold opacity-80">كادر تدريبي</div>
           </div>
           <div>
-            <div className="text-4xl font-bold mb-1">100%</div>
+            <div className="text-4xl font-bold mb-1">{config.successRate}%</div>
             <div className="text-sm font-semibold opacity-80">نسبة النجاح</div>
           </div>
           <div>
-            <div className="text-4xl font-bold mb-1">2020</div>
+            <div className="text-4xl font-bold mb-1">{config.foundingYear}</div>
             <div className="text-sm font-semibold opacity-80">سنة التأسيس</div>
           </div>
         </div>
@@ -137,7 +140,7 @@ export default function Home() {
               </h2>
               <div className="prose prose-lg text-muted-foreground mb-8">
                 <p>
-                  يسرنا أن نرحب بكم في ثانوية الزبير للمتفوقين، الصرح العلمي الذي يهدف إلى بناء جيل واعد من القادة والعلماء.
+                  يسرنا أن نرحب بكم في {config.name}، الصرح العلمي الذي يهدف إلى بناء جيل واعد من القادة والعلماء.
                 </p>
                 <p>
                   نحن نؤمن بأن التعليم ليس مجرد تلقين للمعلومات، بل هو عملية بناء متكاملة للشخصية والفكر. نسعى لتوفير بيئة حاضنة للإبداع والتميز.
