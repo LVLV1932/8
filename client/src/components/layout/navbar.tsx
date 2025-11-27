@@ -56,11 +56,11 @@ export function Navbar() {
           >
             {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
           </Button>
-          <Link href="/signup">
-            <Button size="sm" className="bg-accent hover:bg-accent/90 text-white font-bold">دخول الطالب</Button>
+          <Link href="/login-new">
+            <Button size="sm" className="bg-accent hover:bg-accent/90 text-white font-bold">دخول</Button>
           </Link>
-          <Link href="/login">
-            <Button variant="outline" size="sm" className="border-primary/20 hover:border-primary hover:bg-primary/5 text-primary font-bold">الإدارة</Button>
+          <Link href="/login-new">
+            <Button variant="outline" size="sm" className="border-primary/20 hover:border-primary hover:bg-primary/5 text-primary font-bold">تسجيل</Button>
           </Link>
         </div>
 
@@ -92,11 +92,11 @@ export function Navbar() {
             </Link>
           ))}
           <div className="pt-4 border-t space-y-2">
-             <Link href="/signup" onClick={() => setIsOpen(false)}>
-              <Button className="w-full bg-accent hover:bg-accent/90">دخول الطالب</Button>
+             <Link href="/login-new" onClick={() => setIsOpen(false)}>
+              <Button className="w-full bg-accent hover:bg-accent/90">دخول</Button>
             </Link>
-            <Link href="/login" onClick={() => setIsOpen(false)}>
-              <Button className="w-full" variant="outline">الإدارة</Button>
+            <Link href="/login-new" onClick={() => setIsOpen(false)}>
+              <Button className="w-full" variant="outline">تسجيل جديد</Button>
             </Link>
           </div>
         </div>

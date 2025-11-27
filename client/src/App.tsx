@@ -12,11 +12,13 @@ import Programs from "@/pages/programs";
 import Teachers from "@/pages/teachers";
 import Contact from "@/pages/contact";
 import Login from "@/pages/login";
+import LoginNew from "@/pages/login-new";
 import Admin from "@/pages/admin";
 import Articles from "@/pages/articles";
 import Signup from "@/pages/signup";
 import StudentDashboard from "@/pages/student-dashboard";
 import StudentQA from "@/pages/student-qa";
+import MainPortal from "@/pages/main-portal";
 
 function Router() {
   return (
@@ -28,10 +30,12 @@ function Router() {
       <Route path="/articles" component={Articles} />
       <Route path="/contact" component={Contact} />
       <Route path="/login" component={Login} />
+      <Route path="/login-new" component={LoginNew} />
       <Route path="/admin" component={Admin} />
       <Route path="/signup" component={Signup} />
       <Route path="/student-dashboard" component={StudentDashboard} />
       <Route path="/student-qa" component={StudentQA} />
+      <Route path="/portal" component={MainPortal} />
       <Route component={NotFound} />
     </Switch>
   );

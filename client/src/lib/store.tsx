@@ -1,9 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
+// User roles
+export type UserRole = "admin" | "teacher" | "student";
+
 // Types
 export type Teacher = {
   id: number;
   name: string;
+  email: string;
   subject: string;
   role: string;
   bio: string;
@@ -27,20 +31,35 @@ export type Article = {
   forStudents?: boolean;
 };
 
-export type ClassCode = {
+export type AssignedCode = {
   id: number;
-  grade: string;
   code: string;
-  description: string;
+  grade: string;
+  assignedTo?: string;
+  usedBy?: string;
+  createdAt: string;
 };
 
-export type Student = {
+export type User = {
   id: number;
   name: string;
   email: string;
-  grade: string;
-  classCode: string;
+  password: string;
+  role: UserRole;
+  grade?: string;
+  subject?: string;
+  assignedCode?: string;
   joinDate: string;
+};
+
+export type Notification = {
+  id: number;
+  userId: number;
+  title: string;
+  message: string;
+  type: "info" | "success" | "warning" | "error";
+  read: boolean;
+  createdAt: string;
 };
 
 export type Question = {
@@ -69,11 +88,17 @@ type SchoolContextType = {
   teachers: Teacher[];
   programs: Program[];
   articles: Article[];
-  classCodes: ClassCode[];
-  students: Student[];
+  users: User[];
+  assignedCodes: AssignedCode[];
+  notifications: Notification[];
   questions: Question[];
   config: SchoolConfig;
-  currentStudent: Student | null;
+  currentUser: User | null;
+  
+  // Auth
+  loginUser: (email: string, password: string) => boolean;
+  logoutUser: () => void;
+  registerUser: (user: Omit<User, "id" | "joinDate">) => boolean;
   
   // Teacher actions
   addTeacher: (teacher: Omit<Teacher, "id">) => void;
@@ -90,17 +115,17 @@ type SchoolContextType = {
   updateArticle: (article: Article) => void;
   deleteArticle: (id: number) => void;
   
-  // ClassCode actions
-  addClassCode: (classCode: Omit<ClassCode, "id">) => void;
-  updateClassCode: (classCode: ClassCode) => void;
-  deleteClassCode: (id: number) => void;
+  // Code actions
+  addAssignedCode: (code: Omit<AssignedCode, "id" | "createdAt">) => void;
+  updateAssignedCode: (code: AssignedCode) => void;
+  deleteAssignedCode: (id: number) => void;
+  getAvailableCodes: () => AssignedCode[];
   
-  // Student actions
-  registerStudent: (student: Omit<Student, "id" | "joinDate">) => void;
-  loginStudent: (email: string, classCode: string) => boolean;
-  logoutStudent: () => void;
-  updateStudent: (student: Student) => void;
-  deleteStudent: (id: number) => void;
+  // Notification actions
+  addNotification: (notification: Omit<Notification, "id" | "createdAt">) => void;
+  markNotificationRead: (id: number) => void;
+  deleteNotification: (id: number) => void;
+  getUserNotifications: (userId: number) => Notification[];
   
   // Question actions
   addQuestion: (question: Omit<Question, "id" | "date" | "answered">) => void;
@@ -113,12 +138,9 @@ type SchoolContextType = {
 
 const SchoolContext = createContext<SchoolContextType | undefined>(undefined);
 
-// Initial Data
 const initialTeachers: Teacher[] = [
-  { id: 1, name: "أحمد علي", subject: "الرياضيات", role: "مدرس أول", bio: "خبرة 15 سنة في تدريس الرياضيات للموهوبين" },
-  { id: 2, name: "فاطمة حسين", subject: "الفيزياء", role: "مدرسة", bio: "ماجستير في الفيزياء النووية" },
-  { id: 3, name: "محمد حسن", subject: "الكيمياء", role: "مدرس", bio: "مشرف على المختبرات العلمية" },
-  { id: 4, name: "زينب كاظم", subject: "اللغة الإنجليزية", role: "مدرسة", bio: "حاصلة على شهادة التوفل والآيلتس" },
+  { id: 1, name: "أحمد علي", email: "ahmed@school.iq", subject: "الرياضيات", role: "معلم أول", bio: "خبرة 15 سنة" },
+  { id: 2, name: "فاطمة حسين", email: "fatima@school.iq", subject: "الفيزياء", role: "معلمة", bio: "ماجستير فيزياء" },
 ];
 
 const initialPrograms: Program[] = [
@@ -130,24 +152,11 @@ const initialPrograms: Program[] = [
 const initialArticles: Article[] = [
   { 
     id: 1, 
-    title: "حفل تكريم المتفوقين السنوي", 
-    content: "أقامت المدرسة حفلها السنوي لتكريم الطلبة الأوائل بحضور السيد مدير التربية ونخبة من أولياء الأمور. تم توزيع الجوائز والشهادات التقديرية على الطلاب المتميزين.", 
+    title: "حفل تكريم المتفوقين", 
+    content: "أقامت المدرسة حفلها السنوي لتكريم الطلبة الأوائل.",
     date: "2024/05/15",
     author: "الإدارة"
   },
-  { 
-    id: 2, 
-    title: "افتتاح المختبر العلمي الجديد", 
-    content: "تم اليوم افتتاح مختبر الروبوتات والذكاء الاصطناعي الجديد، المجهز بأحدث التقنيات العالمية لخدمة طلابنا وتطوير مهاراتهم البرمجية.", 
-    date: "2024/04/20",
-    author: "قسم الحاسوب"
-  }
-];
-
-const initialClassCodes: ClassCode[] = [
-  { id: 1, grade: "الأول الثانوي", code: "ZUBAIR-6001", description: "الصف الأول الثانوي" },
-  { id: 2, grade: "الثاني الثانوي", code: "ZUBAIR-6002", description: "الصف الثاني الثانوي" },
-  { id: 3, grade: "الثالث الثانوي", code: "ZUBAIR-6003", description: "الصف الثالث الثانوي" },
 ];
 
 const initialConfig: SchoolConfig = {
@@ -159,8 +168,19 @@ const initialConfig: SchoolConfig = {
   foundingYear: 2020,
   email: "info@alzubair.edu.iq",
   phone: "+964 770 000 0000",
-  address: "البصرة، قضاء الزبير، بجانب تربية الزبير"
+  address: "البصرة، قضاء الزبير"
 };
+
+const initialUsers: User[] = [
+  { 
+    id: 1, 
+    name: "مدير المدرسة", 
+    email: "admin@school.iq", 
+    password: "admin123", 
+    role: "admin",
+    joinDate: new Date().toLocaleDateString('ar-EG')
+  },
+];
 
 export function SchoolProvider({ children }: { children: React.ReactNode }) {
   const [teachers, setTeachers] = useState<Teacher[]>(() => {
@@ -181,15 +201,21 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     return saved ? JSON.parse(saved) : initialArticles;
   });
 
-  const [classCodes, setClassCodes] = useState<ClassCode[]>(() => {
-    if (typeof window === 'undefined') return initialClassCodes;
-    const saved = localStorage.getItem("school_classCodes");
-    return saved ? JSON.parse(saved) : initialClassCodes;
+  const [users, setUsers] = useState<User[]>(() => {
+    if (typeof window === 'undefined') return initialUsers;
+    const saved = localStorage.getItem("school_users");
+    return saved ? JSON.parse(saved) : initialUsers;
   });
 
-  const [students, setStudents] = useState<Student[]>(() => {
+  const [assignedCodes, setAssignedCodes] = useState<AssignedCode[]>(() => {
     if (typeof window === 'undefined') return [];
-    const saved = localStorage.getItem("school_students");
+    const saved = localStorage.getItem("school_assignedCodes");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [notifications, setNotifications] = useState<Notification[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem("school_notifications");
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -205,9 +231,9 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     return saved ? JSON.parse(saved) : initialConfig;
   });
 
-  const [currentStudent, setCurrentStudent] = useState<Student | null>(() => {
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
     if (typeof window === 'undefined') return null;
-    const saved = localStorage.getItem("current_student");
+    const saved = localStorage.getItem("current_user");
     return saved ? JSON.parse(saved) : null;
   });
 
@@ -216,18 +242,50 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("school_teachers", JSON.stringify(teachers));
       localStorage.setItem("school_programs", JSON.stringify(programs));
       localStorage.setItem("school_articles", JSON.stringify(articles));
-      localStorage.setItem("school_classCodes", JSON.stringify(classCodes));
-      localStorage.setItem("school_students", JSON.stringify(students));
+      localStorage.setItem("school_users", JSON.stringify(users));
+      localStorage.setItem("school_assignedCodes", JSON.stringify(assignedCodes));
+      localStorage.setItem("school_notifications", JSON.stringify(notifications));
       localStorage.setItem("school_questions", JSON.stringify(questions));
       localStorage.setItem("school_config", JSON.stringify(config));
     }
-  }, [teachers, programs, articles, classCodes, students, questions, config]);
+  }, [teachers, programs, articles, users, assignedCodes, notifications, questions, config]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && currentStudent) {
-      localStorage.setItem("current_student", JSON.stringify(currentStudent));
+    if (typeof window !== 'undefined' && currentUser) {
+      localStorage.setItem("current_user", JSON.stringify(currentUser));
     }
-  }, [currentStudent]);
+  }, [currentUser]);
+
+  // Auth
+  const loginUser = (email: string, password: string) => {
+    const user = users.find(u => u.email === email && u.password === password);
+    if (user) {
+      setCurrentUser(user);
+      return true;
+    }
+    return false;
+  };
+
+  const logoutUser = () => {
+    setCurrentUser(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("current_user");
+    }
+  };
+
+  const registerUser = (user: Omit<User, "id" | "joinDate">) => {
+    if (users.some(u => u.email === user.email)) {
+      return false;
+    }
+    const newUser = {
+      ...user,
+      id: Date.now(),
+      joinDate: new Date().toLocaleDateString('ar-EG')
+    };
+    setUsers(prev => [...prev, newUser]);
+    setCurrentUser(newUser);
+    return true;
+  };
 
   // Teacher actions
   const addTeacher = (teacher: Omit<Teacher, "id">) => {
@@ -272,57 +330,42 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     setArticles(prev => prev.filter(a => a.id !== id));
   };
 
-  // ClassCode actions
-  const addClassCode = (classCode: Omit<ClassCode, "id">) => {
-    setClassCodes(prev => [...prev, { ...classCode, id: Date.now() }]);
+  // Code actions
+  const addAssignedCode = (code: Omit<AssignedCode, "id" | "createdAt">) => {
+    setAssignedCodes(prev => [...prev, { ...code, id: Date.now(), createdAt: new Date().toLocaleDateString('ar-EG') }]);
   };
 
-  const updateClassCode = (updated: ClassCode) => {
-    setClassCodes(prev => prev.map(c => c.id === updated.id ? updated : c));
+  const updateAssignedCode = (updated: AssignedCode) => {
+    setAssignedCodes(prev => prev.map(c => c.id === updated.id ? updated : c));
   };
 
-  const deleteClassCode = (id: number) => {
-    setClassCodes(prev => prev.filter(c => c.id !== id));
+  const deleteAssignedCode = (id: number) => {
+    setAssignedCodes(prev => prev.filter(c => c.id !== id));
   };
 
-  // Student actions
-  const registerStudent = (student: Omit<Student, "id" | "joinDate">) => {
-    const newStudent: Student = {
-      ...student,
+  const getAvailableCodes = () => {
+    return assignedCodes.filter(c => !c.usedBy);
+  };
+
+  // Notification actions
+  const addNotification = (notification: Omit<Notification, "id" | "createdAt">) => {
+    setNotifications(prev => [...prev, {
+      ...notification,
       id: Date.now(),
-      joinDate: new Date().toLocaleDateString('ar-EG')
-    };
-    setStudents(prev => [...prev, newStudent]);
+      createdAt: new Date().toLocaleDateString('ar-EG')
+    }]);
   };
 
-  const loginStudent = (email: string, classCode: string) => {
-    const student = students.find(s => s.email === email && s.classCode === classCode);
-    if (student) {
-      setCurrentStudent(student);
-      return true;
-    }
-    return false;
+  const markNotificationRead = (id: number) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   };
 
-  const logoutStudent = () => {
-    setCurrentStudent(null);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem("current_student");
-    }
+  const deleteNotification = (id: number) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  const updateStudent = (updated: Student) => {
-    setStudents(prev => prev.map(s => s.id === updated.id ? updated : s));
-    if (currentStudent?.id === updated.id) {
-      setCurrentStudent(updated);
-    }
-  };
-
-  const deleteStudent = (id: number) => {
-    setStudents(prev => prev.filter(s => s.id !== id));
-    if (currentStudent?.id === id) {
-      logoutStudent();
-    }
+  const getUserNotifications = (userId: number) => {
+    return notifications.filter(n => n.userId === userId);
   };
 
   // Question actions
@@ -349,12 +392,13 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <SchoolContext.Provider value={{
-      teachers, programs, articles, classCodes, students, questions, config, currentStudent,
+      teachers, programs, articles, users, assignedCodes, notifications, questions, config, currentUser,
+      loginUser, logoutUser, registerUser,
       addTeacher, updateTeacher, deleteTeacher,
       addProgram, updateProgram, deleteProgram,
       addArticle, updateArticle, deleteArticle,
-      addClassCode, updateClassCode, deleteClassCode,
-      registerStudent, loginStudent, logoutStudent, updateStudent, deleteStudent,
+      addAssignedCode, updateAssignedCode, deleteAssignedCode, getAvailableCodes,
+      addNotification, markNotificationRead, deleteNotification, getUserNotifications,
       addQuestion, answerQuestion, deleteQuestion,
       updateConfig
     }}>
