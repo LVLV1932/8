@@ -24,8 +24,17 @@ export default function LoginNew() {
     await new Promise(r => setTimeout(r, 500));
 
     if (loginUser(data.email, data.password)) {
+      const user = JSON.parse(localStorage.getItem("current_user") || "{}");
       toast({ title: "تم تسجيل الدخول بنجاح" });
-      setLocation("/portal");
+      
+      // توجيه حسب الرتبة
+      if (user.role === "student") {
+        setLocation("/student-portal");
+      } else if (user.role === "teacher") {
+        setLocation("/teacher-portal");
+      } else if (user.role === "admin") {
+        setLocation("/admin");
+      }
     } else {
       toast({ variant: "destructive", title: "خطأ", description: "البريد أو كلمة المرور غير صحيحة" });
     }

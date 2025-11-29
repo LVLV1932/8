@@ -19,6 +19,8 @@ import Signup from "@/pages/signup";
 import StudentDashboard from "@/pages/student-dashboard";
 import StudentQA from "@/pages/student-qa";
 import MainPortal from "@/pages/main-portal";
+import StudentPortal from "@/pages/student-portal";
+import TeacherPortal from "@/pages/teacher-portal";
 
 function Router() {
   return (
@@ -36,6 +38,8 @@ function Router() {
       <Route path="/student-dashboard" component={StudentDashboard} />
       <Route path="/student-qa" component={StudentQA} />
       <Route path="/portal" component={MainPortal} />
+      <Route path="/student-portal" component={StudentPortal} />
+      <Route path="/teacher-portal" component={TeacherPortal} />
       <Route component={NotFound} />
     </Switch>
   );
