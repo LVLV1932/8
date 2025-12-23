@@ -1,0 +1,146 @@
+ابنِ نظام إنشاء حساب وتسجيل دخول لمنصة مدرسة (Web App) مع الأدوار التالية:
+
+Student (طالب)
+
+Teacher (مدرّس)
+
+Admin (إدارة)
+
+1) نموذج التسجيل (بدون أي رقم هوية)
+
+حقول التسجيل للجميع (إجباري):
+
+Full Name (الاسم الكامل)
+
+Username (اسم المستخدم) فريد
+
+Email (البريد الإلكتروني) فريد
+
+Phone Number (رقم الهاتف)
+
+Password (كلمة المرور)
+
+Confirm Password (تأكيد كلمة المرور)
+
+Role Requested (الدور المطلوب: Student / Teacher)
+ملاحظة: Admin لا يسجّل نفسه من النموذج.
+
+Terms checkbox (الموافقة على الشروط)
+
+حقول اختيارية:
+
+Gender (اختياري)
+
+Date of Birth (اختياري)
+
+Address (اختياري)
+
+2) نظام الموافقة الإدارية (Approval Workflow)
+
+عند التسجيل يتم إنشاء طلب بحالة: Pending
+
+لا يسمح بتسجيل الدخول إلا إذا الحالة: Approved
+
+إذا Rejected يظهر للمستخدم سبب الرفض (اختياري)
+
+لوحة Admin تحتوي صفحة “طلبات التسجيل”:
+
+جدول بالطلبات
+
+فلترة حسب الدور والحالة
+
+أزرار Approve / Reject
+
+تسجيل من وافق/رفض ومتى (Audit Log)
+
+3) حفظ تسجيل الدخول (Remember Me)
+
+أضف خيار “Remember me” في صفحة الدخول:
+
+إذا مفعّل: يبقى المستخدم مسجّل دخول بعد إغلاق المتصفح
+
+إذا غير مفعّل: الجلسة تنتهي عند إغلاق المتصفح
+
+نفّذ الحفظ بطريقة آمنة:
+
+استخدم Sessions + HttpOnly cookies (مفضّل) أو JWT مع Refresh Token
+
+اجعل مدة الجلسة:
+
+بدون Remember me: Session cookie
+
+مع Remember me: مثلاً 30 يوم
+
+Endpoint: /api/auth/me لإرجاع المستخدم الحالي عند فتح الموقع
+
+4) عرض مختلف للموقع حسب الرتبة (Role-Based UI)
+
+عند تسجيل الدخول:
+
+إذا role = Student:
+
+يعرض Student Portal: جدول حصص، واجبات، إعلانات، أسئلة/أجوبة…
+
+إذا role = Teacher:
+
+يعرض Teacher Portal: إدارة الدروس، رفع واجبات، متابعة الطلاب…
+
+إذا role = Admin:
+
+يعرض Admin Dashboard: طلبات التسجيل، إدارة المستخدمين، الإعلانات…
+
+طبّق:
+
+حماية Routes (Route Guards):
+
+/student/* للطلاب فقط
+
+/teacher/* للمدرسين فقط
+
+/admin/* للإدارة فقط
+
+إذا دخل شخص لرابط غير مسموح له → 403 أو تحويل لصفحته
+
+5) الأمان والتحقق
+
+تشفير كلمات المرور bcrypt
+
+منع تكرار email و username
+
+Validation واضحة ورسائل خطأ مرتبة
+
+Rate limiting لمحاولات الدخول
+
+منع إنشاء Admin من التسجيل العام
+
+6) المطلوب منك كمخرجات
+
+Database schema: Users, RegistrationRequests, AuditLogs, Sessions (إن لزم)
+
+API endpoints:
+
+POST /api/auth/register
+
+POST /api/auth/login
+
+POST /api/auth/logout
+
+GET /api/auth/me
+
+GET /api/admin/registration-requests
+
+POST /api/admin/registration-requests/:id/approve
+
+POST /api/admin/registration-requests/:id/reject
+
+Frontend pages:
+
+Signup + Pending page
+
+Login + Remember me
+
+Student Portal
+
+Teacher Portal
+
+Admin Dashboard (طلبات التسجيل)
