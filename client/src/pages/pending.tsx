@@ -11,6 +11,14 @@ export default function Pending() {
   const [registration, setRegistration] = useState<any>(null);
 
   useEffect(() => {
+    // Check if coming from login with pending status
+    const pending = localStorage.getItem("currentPending");
+    if (pending) {
+      setRegistration(JSON.parse(pending));
+      return;
+    }
+
+    // Otherwise get last registration
     const registrations = JSON.parse(localStorage.getItem("registrations") || "[]");
     const lastRegistration = registrations[registrations.length - 1];
     setRegistration(lastRegistration);

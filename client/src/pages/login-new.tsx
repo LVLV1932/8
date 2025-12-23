@@ -21,14 +21,37 @@ export default function LoginNew() {
     setIsLoading(true);
     await new Promise(r => setTimeout(r, 500));
 
-    // Get approved users
+    // Get approved users and registrations
     const users: any[] = JSON.parse(localStorage.getItem("users") || "[]");
     const registrations: any[] = JSON.parse(localStorage.getItem("registrations") || "[]");
 
     // Check if user exists and approved
     const user = users.find((u: any) => (u.username === data.username || u.email === data.username) && u.password === data.password);
 
+    // If not approved, check if pending
     if (!user) {
+      const pendingReg = registrations.find((r: any) => 
+        (r.username === data.username || r.email === data.username) && r.password === data.password
+      );
+
+      if (pendingReg) {
+        setIsLoading(false);
+        
+        if (pendingReg.status === "pending") {
+          // Save pending status for /pending page
+          localStorage.setItem("currentPending", JSON.stringify(pendingReg));
+          setLocation("/pending");
+          return;
+        } else if (pendingReg.status === "rejected") {
+          toast({ 
+            variant: "destructive", 
+            title: "تم رفض طلبك", 
+            description: pendingReg.rejectionReason || "لم يتم قبول طلبك" 
+          });
+          return;
+        }
+      }
+
       toast({ variant: "destructive", title: "خطأ", description: "اسم المستخدم أو كلمة المرور غير صحيحة" });
       setIsLoading(false);
       return;
@@ -101,9 +124,12 @@ export default function LoginNew() {
                   {isLoading ? "جاري الدخول..." : "دخول"}
                 </Button>
 
-                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 text-xs text-blue-800">
-                  <p className="font-bold mb-1">🔑 حسابات تجريبية (بعد الموافقة):</p>
-                  <p>username: test.admin / password: 123456</p>
+                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border-2 border-blue-300 text-xs text-blue-900 space-y-2">
+                  <p className="font-bold">🔐 حساب الإدارة (جاهز مباشرة):</p>
+                  <div className="bg-white/60 p-2 rounded font-mono text-blue-800">
+                    <p>👤 اسم المستخدم: <span className="font-bold">admin</span></p>
+                    <p>🔑 كلمة المرور: <span className="font-bold">admin123</span></p>
+                  </div>
                 </div>
 
                 <div className="border-t pt-4">

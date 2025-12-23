@@ -23,6 +23,7 @@ import StudentPortal from "@/pages/student-portal";
 import TeacherPortal from "@/pages/teacher-portal";
 import Register from "@/pages/register";
 import Pending from "@/pages/pending";
+import ArticleDetail from "@/pages/article-detail";
 
 function Router() {
   return (
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/programs" component={Programs} />
       <Route path="/teachers" component={Teachers} />
       <Route path="/articles" component={Articles} />
+      <Route path="/article-detail" component={ArticleDetail} />
       <Route path="/contact" component={Contact} />
       <Route path="/login" component={Login} />
       <Route path="/login-new" component={LoginNew} />

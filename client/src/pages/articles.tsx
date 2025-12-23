@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useSchool } from "@/lib/store";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLocation } from "wouter";
 import studentImg from "@assets/generated_images/student_studying_in_library.png";
 import scienceImg from "@assets/generated_images/science_fair_project.png";
 import sportsImg from "@assets/generated_images/sports_day_celebration.png";
 
 export default function Articles() {
   const { articles } = useSchool();
+  const [, setLocation] = useLocation();
 
   // Helper to get image for article (randomly assigned for demo if not set)
   const getArticleImage = (index: number) => {
@@ -61,7 +63,11 @@ export default function Articles() {
                   </p>
                 </CardContent>
                 <CardFooter className="pt-0">
-                  <Button variant="link" className="px-0 text-secondary hover:text-secondary/80 gap-2">
+                  <Button 
+                    onClick={() => setLocation(`/article-detail?id=${article.id}`)}
+                    variant="link" 
+                    className="px-0 text-secondary hover:text-secondary/80 gap-2"
+                  >
                     اقرأ المزيد <ArrowLeft size={16} />
                   </Button>
                 </CardFooter>
