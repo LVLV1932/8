@@ -21,6 +21,8 @@ import StudentQA from "@/pages/student-qa";
 import MainPortal from "@/pages/main-portal";
 import StudentPortal from "@/pages/student-portal";
 import TeacherPortal from "@/pages/teacher-portal";
+import Register from "@/pages/register";
+import Pending from "@/pages/pending";
 
 function Router() {
   return (
@@ -33,6 +35,8 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/login" component={Login} />
       <Route path="/login-new" component={LoginNew} />
+      <Route path="/register" component={Register} />
+      <Route path="/pending" component={Pending} />
       <Route path="/admin" component={Admin} />
       <Route path="/signup" component={Signup} />
       <Route path="/student-dashboard" component={StudentDashboard} />

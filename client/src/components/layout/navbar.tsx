@@ -58,7 +58,7 @@ export function Navbar() {
           <Link href="/login-new">
             <Button size="sm" className="bg-accent hover:bg-accent/90 text-white font-bold">دخول</Button>
           </Link>
-          <Link href="/login-new">
+          <Link href="/register">
             <Button variant="outline" size="sm" className="border-primary/20 hover:border-primary hover:bg-primary/5 text-primary font-bold">تسجيل</Button>
           </Link>
         </div>
@@ -94,7 +94,7 @@ export function Navbar() {
              <Link href="/login-new" onClick={() => setIsOpen(false)}>
               <Button className="w-full bg-accent hover:bg-accent/90">دخول</Button>
             </Link>
-            <Link href="/login-new" onClick={() => setIsOpen(false)}>
+            <Link href="/register" onClick={() => setIsOpen(false)}>
               <Button className="w-full" variant="outline">تسجيل جديد</Button>
             </Link>
           </div>

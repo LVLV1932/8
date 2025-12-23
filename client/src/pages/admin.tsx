@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocation } from "wouter";
-import { Plus, Trash, Edit, Image as ImageIcon, FileText, Users, Settings, Save, LogOut, BookOpen, CheckCircle, AlertCircle, X, MessageSquare, Key } from "lucide-react";
+import { Plus, Trash, Edit, Image as ImageIcon, FileText, Users, Settings, Save, LogOut, BookOpen, CheckCircle, AlertCircle, X, MessageSquare, Key, ClipboardList } from "lucide-react";
 import { useSchool, Teacher, Program, Article, AssignedCode, Question } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { RegistrationsTab } from "./admin-registrations";
 
 export default function Admin() {
   const [, setLocation] = useLocation();
@@ -95,7 +96,7 @@ export default function Admin() {
       return;
     }
     addArticle(newArticle);
-    setNewArticle({ title: "", content: "", author: "" });
+    setNewArticle({ title: "", content: "", author: "", forStudents: false });
     toast({ title: "تم نشر المقال بنجاح" });
   };
 
@@ -204,6 +205,14 @@ export default function Admin() {
                 >
                   <div className="flex items-center gap-2">
                     <Users size={16}/> المستخدمين والرتب
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="registrations" 
+                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    <ClipboardList size={16}/> طلبات التسجيل
                   </div>
                 </TabsTrigger>
               </TabsList>
@@ -807,6 +816,10 @@ export default function Admin() {
                     ))}
                   </div>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="registrations" className="mt-0">
+                <RegistrationsTab />
               </TabsContent>
 
               <TabsContent value="users" className="mt-0">

@@ -9,13 +9,11 @@ import { useForm } from "react-hook-form";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { useSchool } from "@/lib/store";
 import { motion } from "framer-motion";
 
 export default function LoginNew() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { loginUser } = useSchool();
   const { register, handleSubmit } = useForm();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,21 +21,43 @@ export default function LoginNew() {
     setIsLoading(true);
     await new Promise(r => setTimeout(r, 500));
 
-    if (loginUser(data.email, data.password)) {
-      const user = JSON.parse(localStorage.getItem("current_user") || "{}");
-      toast({ title: "تم تسجيل الدخول بنجاح" });
-      
-      // توجيه حسب الرتبة
-      if (user.role === "student") {
-        setLocation("/student-portal");
-      } else if (user.role === "teacher") {
-        setLocation("/teacher-portal");
-      } else if (user.role === "admin") {
-        setLocation("/admin");
-      }
-    } else {
-      toast({ variant: "destructive", title: "خطأ", description: "البريد أو كلمة المرور غير صحيحة" });
+    // Get approved users
+    const users: any[] = JSON.parse(localStorage.getItem("users") || "[]");
+    const registrations: any[] = JSON.parse(localStorage.getItem("registrations") || "[]");
+
+    // Check if user exists and approved
+    const user = users.find((u: any) => (u.username === data.username || u.email === data.username) && u.password === data.password);
+
+    if (!user) {
+      toast({ variant: "destructive", title: "خطأ", description: "اسم المستخدم أو كلمة المرور غير صحيحة" });
+      setIsLoading(false);
+      return;
     }
+
+    // Save user session
+    const session = {
+      ...user,
+      loginTime: new Date().toLocaleString('ar-EG'),
+      rememberMe: data.rememberMe || false,
+    };
+
+    localStorage.setItem("currentUser", JSON.stringify(session));
+    
+    if (data.rememberMe) {
+      localStorage.setItem("rememberMe", "true");
+    }
+
+    toast({ title: "تم تسجيل الدخول بنجاح" });
+    
+    // Navigate based on role
+    if (user.role === "student") {
+      setLocation("/student-portal");
+    } else if (user.role === "teacher") {
+      setLocation("/teacher-portal");
+    } else if (user.role === "admin") {
+      setLocation("/admin");
+    }
+
     setIsLoading(false);
   };
 
@@ -57,10 +77,10 @@ export default function LoginNew() {
             <CardContent className="pt-8">
               <form onSubmit={handleSubmit(onLogin)} className="space-y-5">
                 <div className="space-y-2">
-                  <Label>البريد الإلكتروني</Label>
+                  <Label>اسم المستخدم أو البريد الإلكتروني</Label>
                   <div className="relative">
                     <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input {...register("email")} type="email" placeholder="admin@school.iq" className="pr-10 text-right" required />
+                    <Input {...register("username")} placeholder="mohammed.ahmed أو email@example.com" className="pr-10 text-right" required />
                   </div>
                 </div>
 
@@ -72,13 +92,18 @@ export default function LoginNew() {
                   </div>
                 </div>
 
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" {...register("rememberMe")} id="rememberMe" className="w-4 h-4" />
+                  <label htmlFor="rememberMe" className="text-sm">تذكرني لمدة 30 يوم</label>
+                </div>
+
                 <Button type="submit" className="w-full bg-primary hover:bg-primary/90 font-bold text-base" disabled={isLoading}>
                   {isLoading ? "جاري الدخول..." : "دخول"}
                 </Button>
 
                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 text-xs text-blue-800">
-                  <p className="font-bold mb-1">🔑 الحسابات التجريبية:</p>
-                  <p>admin@school.iq / admin123</p>
+                  <p className="font-bold mb-1">🔑 حسابات تجريبية (بعد الموافقة):</p>
+                  <p>username: test.admin / password: 123456</p>
                 </div>
 
                 <div className="border-t pt-4">
@@ -87,9 +112,9 @@ export default function LoginNew() {
                     type="button"
                     variant="outline"
                     className="w-full"
-                    onClick={() => setLocation("/signup")}
+                    onClick={() => setLocation("/register")}
                   >
-                    تسجيل جديد بكود
+                    إنشاء حساب جديد
                   </Button>
                 </div>
               </form>
