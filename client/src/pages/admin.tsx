@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocation } from "wouter";
-import { Plus, Trash, Edit, Image as ImageIcon, FileText, Users, Settings, Save, LogOut, BookOpen, CheckCircle, AlertCircle, X, MessageSquare, Key, ClipboardList } from "lucide-react";
+import { Plus, Trash, Edit, Image as ImageIcon, FileText, Users, Settings, Save, LogOut, BookOpen, CheckCircle, AlertCircle, X, MessageSquare, Key, ClipboardList, Shield, UserCircle } from "lucide-react";
 import { useSchool, Teacher, Program, Article, AssignedCode, Question } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -24,8 +24,10 @@ export default function Admin() {
     articles, addArticle, updateArticle, deleteArticle,
     assignedCodes, addAssignedCode, updateAssignedCode, deleteAssignedCode,
     questions, answerQuestion, deleteQuestion,
-    users, updateUser
+    users, updateUser, deleteUser
   } = useSchool();
+
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   // Local state for forms
   const [newTeacher, setNewTeacher] = useState({ name: "", email: "", subject: "", role: "", bio: "" });

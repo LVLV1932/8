@@ -100,7 +100,8 @@ type SchoolContextType = {
   logoutUser: () => void;
   registerUser: (user: Omit<User, "id" | "joinDate">) => boolean;
   updateUser: (user: User) => void;
-  
+  deleteUser: (id: number) => void;
+
   // Teacher actions
   addTeacher: (teacher: Omit<Teacher, "id">) => void;
   updateTeacher: (teacher: Teacher) => void;
@@ -259,12 +260,17 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
 
   // Auth
   const loginUser = (email: string, password: string) => {
-    const user = users.find(u => u.email === email && u.password === password);
+    // Check both users array and registrations (if approved)
+    const user = users.find(u => (u.email === email || u.name === email) && u.password === password);
     if (user) {
       setCurrentUser(user);
       return true;
     }
     return false;
+  };
+
+  const deleteUser = (id: number) => {
+    setUsers(prev => prev.filter(u => u.id !== id));
   };
 
   const logoutUser = () => {

@@ -22,11 +22,11 @@ export default function LoginNew() {
     await new Promise(r => setTimeout(r, 500));
 
     // Get approved users and registrations
-    const users: any[] = JSON.parse(localStorage.getItem("users") || "[]");
+    const users: any[] = JSON.parse(localStorage.getItem("school_users") || "[]");
     const registrations: any[] = JSON.parse(localStorage.getItem("registrations") || "[]");
 
-    // Check if user exists and approved
-    const user = users.find((u: any) => (u.username === data.username || u.email === data.username) && u.password === data.password);
+    // Check if user exists in school_users (main storage)
+    const user = users.find((u: any) => (u.email === data.username || u.name === data.username) && u.password === data.password);
 
     // If not approved, check if pending
     if (!user) {
