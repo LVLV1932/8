@@ -90,13 +90,27 @@ export default function Admin() {
   };
 
   // Article Handlers
+  const [articleImage, setArticleImage] = useState<string>("");
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setArticleImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleAddArticle = () => {
     if (!newArticle.title || !newArticle.content) {
       toast({ variant: "destructive", title: "خطأ", description: "العنوان والمحتوى مطلوبان" });
       return;
     }
-    addArticle(newArticle);
+    addArticle({ ...newArticle, image: articleImage });
     setNewArticle({ title: "", content: "", author: "", forStudents: false });
+    setArticleImage("");
     toast({ title: "تم نشر المقال بنجاح" });
   };
 
@@ -538,16 +552,40 @@ export default function Admin() {
                           <Input 
                             value={newArticle.title}
                             onChange={e => setNewArticle({...newArticle, title: e.target.value})}
-                            className="bg-background"
+                            className="bg-background text-right"
                             placeholder="عنوان جذاب..."
                           />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>صورة المقال</Label>
+                          <div className="flex flex-col gap-4">
+                            <Input 
+                              type="file" 
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="bg-background text-right"
+                            />
+                            {articleImage && (
+                              <div className="relative w-full h-40 rounded-lg overflow-hidden border shadow-inner">
+                                <img src={articleImage} alt="Preview" className="w-full h-full object-cover" />
+                                <Button 
+                                  variant="destructive" 
+                                  size="sm" 
+                                  className="absolute top-2 right-2 shadow-lg"
+                                  onClick={() => setArticleImage("")}
+                                >
+                                  حذف الصورة
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                         <div className="space-y-2">
                           <Label>الكاتب (اختياري)</Label>
                           <Input 
                             value={newArticle.author}
                             onChange={e => setNewArticle({...newArticle, author: e.target.value})}
-                            className="bg-background"
+                            className="bg-background text-right"
                             placeholder="مثال: الإدارة"
                           />
                         </div>
@@ -556,13 +594,13 @@ export default function Admin() {
                           <Textarea 
                             value={newArticle.content}
                             onChange={e => setNewArticle({...newArticle, content: e.target.value})}
-                            className="bg-background"
+                            className="bg-background text-right"
                             rows={8}
                             placeholder="اكتب تفاصيل الخبر هنا..."
                           />
                         </div>
-                        <Button onClick={handleAddArticle} className="w-full gap-2 mt-2">
-                          <FileText size={16}/> نشر الآن
+                        <Button onClick={handleAddArticle} className="w-full gap-2 mt-2 bg-primary hover:bg-primary/90 font-bold">
+                          <FileText size={16}/> نشر المقال الآن
                         </Button>
                       </div>
                     </div>

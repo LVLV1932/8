@@ -64,7 +64,14 @@ export default function Register() {
     registrations.push(newRegistration);
     localStorage.setItem("registrations", JSON.stringify(registrations));
 
-    toast({ title: "تم إنشاء الطلب بنجاح ✓", description: "في انتظار موافقة الإدارة" });
+    toast({ 
+      title: "تم إرسال الطلب بنجاح", 
+      description: "تم إرسال بياناتك للإدارة للمراجعة. يمكنك متابعة حالة الطلب هنا." 
+    });
+    
+    // Save to current pending for viewing
+    localStorage.setItem("currentPending", JSON.stringify(newRegistration));
+    
     await new Promise(r => setTimeout(r, 1500));
     setLocation("/pending");
     setLoading(false);

@@ -38,6 +38,11 @@ export default function LoginNew() {
         setIsLoading(false);
         
         if (pendingReg.status === "pending") {
+          toast({ 
+            title: "قيد المراجعة", 
+            description: "طلبك قيد المراجعة حالياً من قبل الإدارة. يرجى الانتظار.",
+            variant: "default" 
+          });
           // Save pending status for /pending page
           localStorage.setItem("currentPending", JSON.stringify(pendingReg));
           setLocation("/pending");
