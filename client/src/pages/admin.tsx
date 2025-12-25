@@ -218,7 +218,7 @@ export default function Admin() {
                   className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
                 >
                   <div className="flex items-center gap-2">
-                    <Users size={16}/> المستخدمين والرتب
+                    <Users size={16}/> إدارة المستخدمين
                   </div>
                 </TabsTrigger>
                 <TabsTrigger 
@@ -235,6 +235,26 @@ export default function Admin() {
             <div className="p-6 md:p-8 bg-card min-h-[500px]">
               <TabsContent value="config" className="mt-0">
                 <div className="max-w-4xl mx-auto">
+                  <div className="grid md:grid-cols-3 gap-6 mb-8">
+                    <Card className="bg-primary/5 border-none shadow-sm">
+                      <CardContent className="p-6 flex items-center gap-4">
+                        <div className="bg-primary/10 p-3 rounded-xl text-primary"><Users size={24}/></div>
+                        <div><p className="text-sm text-muted-foreground font-bold">الطلاب</p><p className="text-2xl font-black">{users.filter(u => u.role === 'student').length}</p></div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-secondary/5 border-none shadow-sm">
+                      <CardContent className="p-6 flex items-center gap-4">
+                        <div className="bg-secondary/10 p-3 rounded-xl text-secondary"><Users size={24}/></div>
+                        <div><p className="text-sm text-muted-foreground font-bold">المدرسون</p><p className="text-2xl font-black">{teachers.length}</p></div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-accent/5 border-none shadow-sm">
+                      <CardContent className="p-6 flex items-center gap-4">
+                        <div className="bg-accent/10 p-3 rounded-xl text-accent"><MessageSquare size={24}/></div>
+                        <div><p className="text-sm text-muted-foreground font-bold">الأسئلة</p><p className="text-2xl font-black">{questions.length}</p></div>
+                      </CardContent>
+                    </Card>
+                  </div>
                   <div className="mb-8">
                     <h2 className="text-xl font-bold text-primary mb-2">معلومات المدرسة</h2>
                     <p className="text-muted-foreground">هذه المعلومات تظهر في الصفحة الرئيسية وشريط الإحصائيات.</p>

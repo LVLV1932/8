@@ -20,13 +20,23 @@ export default function StudentPortal() {
     return null;
   }
 
-  const notifications = getUserNotifications(currentUser.id);
-  const studentQuestions = questions.filter(q => q.studentEmail === currentUser.email);
+  const [newQuestion, setNewQuestion] = useState("");
 
   const handleLogout = () => {
     logoutUser();
     toast({ title: "تم تسجيل الخروج" });
     setLocation("/");
+  };
+
+  const handleAddQuestion = () => {
+    if (!newQuestion.trim()) return;
+    addQuestion({
+      studentName: currentUser.name || "طالب",
+      studentEmail: currentUser.email,
+      question: newQuestion,
+    });
+    setNewQuestion("");
+    toast({ title: "تم إرسال سؤالك للمعلم" });
   };
 
   // Mock data for student
@@ -288,9 +298,22 @@ export default function StudentPortal() {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="messages" className="mt-6 space-y-4">
-                    {studentQuestions.length > 0 ? (
-                      studentQuestions.map((q) => (
+                          <div className="space-y-4">
+                            <div className="bg-primary/5 p-4 rounded-xl border border-primary/10">
+                              <h4 className="font-bold text-primary mb-3">طرح سؤال جديد</h4>
+                              <div className="flex gap-2">
+                                <Input 
+                                  value={newQuestion}
+                                  onChange={(e) => setNewQuestion(e.target.value)}
+                                  placeholder="اكتب سؤالك هنا..."
+                                  className="text-right"
+                                />
+                                <Button onClick={handleAddQuestion} className="gap-2">
+                                  <MessageSquare size={16} /> إرسال
+                                </Button>
+                              </div>
+                            </div>
+                            {studentQuestions.map((q) => (
                         <Card key={q.id} className="border-none hover:shadow-lg transition-all">
                           <CardContent className="p-5">
                             <div className="flex gap-4">
