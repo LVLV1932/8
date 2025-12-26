@@ -17,20 +17,33 @@ export default function Login() {
 
   const onSubmit = async (data: any) => {
     setIsLoading(true);
-    // Mock authentication
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (data.username === "admin" && data.password === "Zubair@2025#Secure") {
-      toast({ title: "تم تسجيل الدخول بنجاح" });
-      setLocation("/admin");
-    } else {
-      toast({ 
-        variant: "destructive",
-        title: "فشل تسجيل الدخول",
-        description: "اسم المستخدم أو كلمة المرور غير صحيحة" 
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username: data.username, password: data.password }),
       });
+
+      const payload = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const msg = payload?.message || "فشل تسجيل الدخول";
+        const desc = payload?.status === "pending"
+          ? "حسابك قيد المراجعة من الإدارة"
+          : "اسم المستخدم أو كلمة المرور غير صحيحة";
+        toast({ variant: "destructive", title: msg, description: desc });
+        return;
+      }
+
+      const role = payload?.user?.role;
+      toast({ title: "تم تسجيل الدخول بنجاح" });
+      if (role === "admin") setLocation("/admin");
+      else if (role === "teacher") setLocation("/teacher-portal");
+      else setLocation("/student-portal");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
@@ -47,10 +60,9 @@ export default function Login() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="bg-yellow-50 text-yellow-800 p-3 rounded-md text-xs mb-6 border border-yellow-200">
-              <p className="font-bold mb-1">بيانات تجريبية:</p>
-              <p>المستخدم: admin</p>
-              <p>كلمة المرور: Zubair@2025#Secure</p>
+            <div className="bg-muted/40 p-3 rounded-md text-xs mb-6 border">
+              <p className="font-bold mb-1">ملاحظة:</p>
+              <p>إذا كان حسابك جديدًا فقد يحتاج موافقة الإدارة قبل الدخول.</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

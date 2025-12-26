@@ -29,54 +29,33 @@ export default function Register() {
       return;
     }
 
-    // Get existing registrations and users
-    const registrations: any[] = JSON.parse(localStorage.getItem("registrations") || "[]");
-    const users: any[] = JSON.parse(localStorage.getItem("users") || "[]");
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: data.username,
+          password: data.password,
+          role: data.role,
+        }),
+      });
 
-    // Check for duplicate username or email
-    if (users.some((u: any) => u.username === data.username) || registrations.some((r: any) => r.username === data.username)) {
-      toast({ variant: "destructive", title: "خطأ", description: "اسم المستخدم موجود بالفعل" });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = payload?.message || "تعذر إنشاء الحساب";
+        toast({ variant: "destructive", title: "خطأ", description: msg });
+        return;
+      }
+
+      localStorage.setItem("currentPending", JSON.stringify({ username: data.username }));
+      toast({
+        title: "تم إرسال الطلب بنجاح",
+        description: "تم إرسال بياناتك للإدارة للمراجعة. ستتمكن من الدخول بعد الموافقة.",
+      });
+      setLocation("/pending");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    if (users.some((u: any) => u.email === data.email) || registrations.some((r: any) => r.email === data.email)) {
-      toast({ variant: "destructive", title: "خطأ", description: "البريد الإلكتروني مستخدم بالفعل" });
-      setLoading(false);
-      return;
-    }
-
-    // Create registration request
-    const newRegistration = {
-      id: Date.now(),
-      fullName: data.fullName,
-      username: data.username,
-      email: data.email,
-      phone: data.phone,
-      password: data.password,
-      role: data.role,
-      gender: data.gender || null,
-      dob: data.dob || null,
-      address: data.address || null,
-      status: "pending",
-      createdAt: new Date().toLocaleString('ar-EG'),
-      rejectionReason: null,
-    };
-
-    registrations.push(newRegistration);
-    localStorage.setItem("registrations", JSON.stringify(registrations));
-
-    toast({ 
-      title: "تم إرسال الطلب بنجاح", 
-      description: "تم إرسال بياناتك للإدارة للمراجعة. يمكنك متابعة حالة الطلب هنا." 
-    });
-    
-    // Save to current pending for viewing
-    localStorage.setItem("currentPending", JSON.stringify(newRegistration));
-    
-    await new Promise(r => setTimeout(r, 1500));
-    setLocation("/pending");
-    setLoading(false);
   };
 
   return (

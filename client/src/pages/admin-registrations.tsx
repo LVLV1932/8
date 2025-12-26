@@ -4,70 +4,60 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useSchool } from "@/lib/store";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export function RegistrationsTab() {
   const { toast } = useToast();
-  const { registerUser } = useSchool();
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [rejectReason, setRejectReason] = useState("");
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
-    const regs = JSON.parse(localStorage.getItem("registrations") || "[]");
-    setRegistrations(regs);
-  }, []);
+    (async () => {
+      const res = await fetch("/api/admin/registrations", { credentials: "include" });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast({ variant: "destructive", title: "خطأ", description: payload?.message || "تعذر تحميل الطلبات" });
+        return;
+      }
+      setRegistrations(payload?.pending || []);
+    })();
+  }, [toast]);
 
-  const handleApprove = (id: number) => {
-    const reg = registrations.find(r => r.id === id);
-    if (!reg) return;
-
-    // Direct registration via store
-    const success = registerUser({
-      name: reg.fullName,
-      email: reg.email,
-      password: reg.password,
-      role: reg.role,
-      grade: reg.grade
+  const handleApprove = async (id: string) => {
+    const res = await fetch(`/api/admin/registrations/${id}/approve`, {
+      method: "POST",
+      credentials: "include",
     });
-
-    if (success) {
-      // Update registration status locally
-      const updated = registrations.map(r => 
-        r.id === id ? { ...r, status: "approved" } : r
-      );
-      setRegistrations(updated);
-      localStorage.setItem("registrations", JSON.stringify(updated));
-
-      toast({ 
-        title: `✓ تم قبول طلب ${reg.fullName}`,
-        description: "تم إنشاء الحساب بنجاح ويظهر الآن في قائمة المستخدمين"
-      });
-    } else {
-      toast({ 
-        variant: "destructive",
-        title: "خطأ", 
-        description: "هذا البريد الإلكتروني مسجل مسبقاً في النظام" 
-      });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast({ variant: "destructive", title: "خطأ", description: payload?.message || "تعذر قبول الطلب" });
+      return;
     }
+    setRegistrations((prev) => prev.filter((r) => r.id !== id));
+    toast({ title: "تم قبول الطلب" });
   };
 
-  const handleReject = (id: number) => {
+  const handleReject = async (id: string) => {
     if (!rejectReason.trim()) {
       toast({ variant: "destructive", title: "خطأ", description: "يرجى كتابة سبب الرفض" });
       return;
     }
 
-    const updated = registrations.map(r => 
-      r.id === id ? { ...r, status: "rejected", rejectionReason: rejectReason } : r
-    );
-    setRegistrations(updated);
-    localStorage.setItem("registrations", JSON.stringify(updated));
-    
+    const res = await fetch(`/api/admin/registrations/${id}/reject`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason: rejectReason }),
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast({ variant: "destructive", title: "خطأ", description: payload?.message || "تعذر رفض الطلب" });
+      return;
+    }
+    setRegistrations((prev) => prev.filter((r) => r.id !== id));
     setRejectReason("");
     setSelectedId(null);
     toast({ title: "تم رفض الطلب" });
@@ -75,7 +65,8 @@ export function RegistrationsTab() {
 
   const filtered = registrations.filter(r => {
     if (filterRole !== "all" && r.role !== filterRole) return false;
-    if (filterStatus !== "all" && r.status !== filterStatus) return false;
+    // server returns only pending here
+    if (filterStatus !== "all" && filterStatus !== "pending") return false;
     return true;
   });
 
@@ -95,17 +86,8 @@ export function RegistrationsTab() {
           </select>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-bold">فلتر الحالة</label>
-          <select 
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="border rounded-lg p-2"
-          >
-            <option value="all">الجميع</option>
-            <option value="pending">في الانتظار</option>
-            <option value="approved">موافق عليها</option>
-            <option value="rejected">مرفوضة</option>
-          </select>
+          <label className="text-sm font-bold">الحالة</label>
+          <div className="border rounded-lg p-2 text-sm text-muted-foreground">في الانتظار</div>
         </div>
       </div>
 
@@ -121,30 +103,19 @@ export function RegistrationsTab() {
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="font-bold text-lg text-primary">{reg.fullName}</h3>
-                      <p className="text-sm text-muted-foreground">@{reg.username} | {reg.email}</p>
-                      <p className="text-sm text-muted-foreground mt-1">📞 {reg.phone}</p>
-                      <p className="text-xs text-muted-foreground mt-2">انشئ في: {reg.createdAt}</p>
+                      <h3 className="font-bold text-lg text-primary">@{reg.username}</h3>
+                      <p className="text-sm text-muted-foreground">طلب إنشاء حساب جديد</p>
                     </div>
                     
                     <div className="flex flex-col gap-2 items-end">
                       {reg.role === "student" && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">🎓 طالب</span>}
                       {reg.role === "teacher" && <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">👨‍🏫 معلم</span>}
                       
-                      {reg.status === "pending" && <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded flex items-center gap-1"><Clock size={12} /> في الانتظار</span>}
-                      {reg.status === "approved" && <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded flex items-center gap-1"><CheckCircle size={12} /> موافق</span>}
-                      {reg.status === "rejected" && <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded flex items-center gap-1"><XCircle size={12} /> مرفوض</span>}
+                      <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded flex items-center gap-1"><Clock size={12} /> في الانتظار</span>
                     </div>
                   </div>
 
-                  {reg.status === "rejected" && (
-                    <div className="bg-red-50 p-3 rounded-lg mb-4 border border-red-200">
-                      <p className="text-xs text-red-700"><strong>سبب الرفض:</strong> {reg.rejectionReason}</p>
-                    </div>
-                  )}
-
-                  {reg.status === "pending" && (
-                    <div className="space-y-3">
+                  <div className="space-y-3">
                       {selectedId === reg.id ? (
                         <div className="space-y-3 bg-red-50 p-3 rounded-lg border border-red-200">
                           <Textarea 
@@ -184,7 +155,7 @@ export function RegistrationsTab() {
                         </div>
                       )}
                     </div>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

@@ -9,7 +9,7 @@ import { useLocation } from "wouter";
 import { Plus, Trash, Edit, Image as ImageIcon, FileText, Users, Settings, Save, LogOut, BookOpen, CheckCircle, AlertCircle, X, MessageSquare, Key, ClipboardList, Shield, UserCircle } from "lucide-react";
 import { useSchool, Teacher, Program, Article, AssignedCode, Question, User } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { RegistrationsTab } from "./admin-registrations";
@@ -17,6 +17,8 @@ import { RegistrationsTab } from "./admin-registrations";
 export default function Admin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const { 
     config, updateConfig, 
     teachers, addTeacher, updateTeacher, deleteTeacher, 
@@ -28,6 +30,27 @@ export default function Admin() {
     classes, addClass, updateClass, deleteClass,
     terms, updateTerms
   } = useSchool();
+
+  // Protect admin route
+  // NOTE: Hooks stay at the top-level; no early returns before hooks.
+  useState;
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setIsAuthorized(false);
+          return;
+        }
+        if (payload?.user?.role === "admin") setIsAuthorized(true);
+        else setIsAuthorized(false);
+      } finally {
+        setAuthChecked(true);
+      }
+    })();
+  }, [setLocation]);
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newTerms, setNewTerms] = useState(terms);
@@ -45,6 +68,22 @@ export default function Admin() {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setIsAuthorized(false);
+          return;
+        }
+        setIsAuthorized(payload?.user?.role === "admin");
+      } finally {
+        setAuthChecked(true);
+      }
+    })();
+  }, []);
 
   const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,6 +167,25 @@ export default function Admin() {
     toast({ title: "تم تحديث المقال" });
   };
 
+  if (!authChecked) {
+    return (
+      <Layout>
+        <div className="min-h-[60vh] flex items-center justify-center text-muted-foreground">جاري التحقق...</div>
+      </Layout>
+    );
+  }
+
+  if (!isAuthorized) {
+    return (
+      <Layout>
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+          <div className="text-muted-foreground">هذه الصفحة خاصة بالإدارة فقط.</div>
+          <Button onClick={() => setLocation("/login")}>تسجيل الدخول</Button>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       {/* Dashboard Header */}
@@ -148,8 +206,10 @@ export default function Admin() {
               size="sm" 
               className="gap-2 shadow-lg hover:bg-white"
               onClick={() => {
-                toast({ title: "تم تسجيل الخروج" });
-                setLocation("/");
+                fetch("/api/auth/logout", { method: "POST", credentials: "include" }).finally(() => {
+                  toast({ title: "تم تسجيل الخروج" });
+                  setLocation("/");
+                });
               }}
             >
               <LogOut size={16}/> خروج
