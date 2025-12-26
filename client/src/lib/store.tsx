@@ -93,6 +93,7 @@ type SchoolContextType = {
   notifications: Notification[];
   questions: Question[];
   config: SchoolConfig;
+  terms: string;
   currentUser: User | null;
   
   // Auth
@@ -101,6 +102,9 @@ type SchoolContextType = {
   registerUser: (user: Omit<User, "id" | "joinDate">) => boolean;
   updateUser: (user: User) => void;
   deleteUser: (id: number) => void;
+
+  // Terms actions
+  updateTerms: (terms: string) => void;
 
   // Teacher actions
   addTeacher: (teacher: Omit<Teacher, "id">) => void;
@@ -233,6 +237,12 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     return saved ? JSON.parse(saved) : initialConfig;
   });
 
+  const [terms, setTerms] = useState<string>(() => {
+    if (typeof window === 'undefined') return "شروط الاستخدام الأساسية للمدرسة...";
+    const saved = localStorage.getItem("school_terms");
+    return saved ? saved : "أوافق على الالتزام بقوانين المدرسة والحفاظ على سرية المعلومات الأكاديمية والمشاركة الفعالة في العملية التعليمية.";
+  });
+
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     if (typeof window === 'undefined') return null;
     const saved = localStorage.getItem("current_user");
@@ -249,8 +259,9 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("school_notifications", JSON.stringify(notifications));
       localStorage.setItem("school_questions", JSON.stringify(questions));
       localStorage.setItem("school_config", JSON.stringify(config));
+      localStorage.setItem("school_terms", terms);
     }
-  }, [teachers, programs, articles, users, assignedCodes, notifications, questions, config]);
+  }, [teachers, programs, articles, users, assignedCodes, notifications, questions, config, terms]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && currentUser) {
@@ -404,17 +415,21 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     setConfig(prev => ({ ...prev, ...newConfig }));
   };
 
+  const updateTerms = (newTerms: string) => {
+    setTerms(newTerms);
+  };
+
   return (
     <SchoolContext.Provider value={{
-      teachers, programs, articles, users, assignedCodes, notifications, questions, config, currentUser,
-      loginUser, logoutUser, registerUser, updateUser,
+      teachers, programs, articles, users, assignedCodes, notifications, questions, config, terms, currentUser,
+      loginUser, logoutUser, registerUser, updateUser, deleteUser,
       addTeacher, updateTeacher, deleteTeacher,
       addProgram, updateProgram, deleteProgram,
       addArticle, updateArticle, deleteArticle,
       addAssignedCode, updateAssignedCode, deleteAssignedCode, getAvailableCodes,
       addNotification, markNotificationRead, deleteNotification, getUserNotifications,
       addQuestion, answerQuestion, deleteQuestion,
-      updateConfig
+      updateConfig, updateTerms
     }}>
       {children}
     </SchoolContext.Provider>

@@ -24,10 +24,12 @@ export default function Admin() {
     articles, addArticle, updateArticle, deleteArticle,
     assignedCodes, addAssignedCode, updateAssignedCode, deleteAssignedCode,
     questions, answerQuestion, deleteQuestion,
-    users, updateUser, deleteUser
+    users, updateUser, deleteUser,
+    terms, updateTerms
   } = useSchool();
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [newTerms, setNewTerms] = useState(terms);
 
   // Local state for forms
   const [newTeacher, setNewTeacher] = useState({ name: "", email: "", subject: "", role: "", bio: "" });
@@ -229,6 +231,14 @@ export default function Admin() {
                 >
                   <div className="flex items-center gap-2">
                     <ClipboardList size={16}/> طلبات التسجيل
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="terms" 
+                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText size={16}/> الشروط والأحكام
                   </div>
                 </TabsTrigger>
               </TabsList>
@@ -880,6 +890,34 @@ export default function Admin() {
 
               <TabsContent value="registrations" className="mt-0">
                 <RegistrationsTab />
+              </TabsContent>
+
+              <TabsContent value="terms" className="mt-0">
+                <div className="max-w-4xl mx-auto space-y-6">
+                  <div className="text-right">
+                    <h2 className="text-2xl font-bold text-primary">تعديل الشروط والأحكام</h2>
+                    <p className="text-muted-foreground">تظهر هذه الشروط للمستخدمين الجدد عند إنشاء حساب</p>
+                  </div>
+                  <div className="space-y-4">
+                    <Textarea 
+                      value={newTerms} 
+                      onChange={(e) => setNewTerms(e.target.value)} 
+                      className="min-h-[300px] text-right text-lg leading-relaxed p-6"
+                      placeholder="اكتب الشروط والأحكام هنا..."
+                    />
+                    <div className="flex justify-end">
+                      <Button 
+                        onClick={() => {
+                          updateTerms(newTerms);
+                          toast({ title: "✅ تم تحديث الشروط بنجاح" });
+                        }}
+                        className="bg-secondary text-secondary-foreground hover:bg-secondary/90 gap-2 font-bold px-8 h-12"
+                      >
+                        <Save size={18}/> حفظ الشروط
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="users" className="mt-0">

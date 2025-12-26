@@ -8,12 +8,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useSchool } from "@/lib/store";
 import { motion } from "framer-motion";
 import { UserPlus } from "lucide-react";
 
 export default function Register() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { terms } = useSchool();
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const password = watch("password");
   const [loading, setLoading] = useState(false);
@@ -206,15 +208,22 @@ export default function Register() {
                 </div>
 
                 {/* Terms */}
-                <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <Checkbox {...register("terms")} />
-                  <label className="text-sm text-right flex-1 cursor-pointer">
-                    أوافق على الشروط والأحكام والسياسات
-                  </label>
+                <div className="space-y-3">
+                  <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 max-h-32 overflow-y-auto text-xs text-right text-blue-800 leading-relaxed">
+                    <p className="font-bold mb-2">📜 الشروط والأحكام:</p>
+                    {terms}
+                  </div>
+                  <div className="flex items-center gap-2 px-1">
+                    <Checkbox id="terms-check" {...register("terms", { required: "يجب الموافقة على الشروط للمتابعة" })} />
+                    <Label htmlFor="terms-check" className="text-sm cursor-pointer select-none">
+                      أوافق على الشروط والأحكام المذكورة أعلاه *
+                    </Label>
+                  </div>
+                  {errors.terms && <p className="text-red-500 text-xs">{String(errors.terms?.message)}</p>}
                 </div>
 
                 <Button type="submit" className="w-full bg-primary hover:bg-primary/90 font-bold text-lg py-6" disabled={loading}>
-                  {loading ? "جاري الإنشاء..." : "إنشاء الحساب"}
+                  {loading ? "جاري إرسال الطلب..." : "إرسال طلب الانضمام"}
                 </Button>
 
                 <div className="text-center text-sm text-muted-foreground">
