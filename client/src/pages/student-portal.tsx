@@ -2,6 +2,7 @@ import { Layout } from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { useSchool } from "@/lib/store";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
@@ -11,7 +12,7 @@ import { useState } from "react";
 
 export default function StudentPortal() {
   const [, setLocation] = useLocation();
-  const { currentUser, logoutUser, getUserNotifications, questions } = useSchool();
+  const { currentUser, logoutUser, getUserNotifications, questions, addQuestion } = useSchool();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dashboard");
 
@@ -38,6 +39,9 @@ export default function StudentPortal() {
     setNewQuestion("");
     toast({ title: "تم إرسال سؤالك للمعلم" });
   };
+
+  const studentQuestions = questions.filter(q => q.studentEmail === currentUser.email);
+  const notifications = getUserNotifications(currentUser.id);
 
   // Mock data for student
   const subjects = [
@@ -298,55 +302,58 @@ export default function StudentPortal() {
                     </div>
                   </TabsContent>
 
-                          <div className="space-y-4">
-                            <div className="bg-primary/5 p-4 rounded-xl border border-primary/10">
-                              <h4 className="font-bold text-primary mb-3">طرح سؤال جديد</h4>
-                              <div className="flex gap-2">
-                                <Input 
-                                  value={newQuestion}
-                                  onChange={(e) => setNewQuestion(e.target.value)}
-                                  placeholder="اكتب سؤالك هنا..."
-                                  className="text-right"
-                                />
-                                <Button onClick={handleAddQuestion} className="gap-2">
-                                  <MessageSquare size={16} /> إرسال
-                                </Button>
+                  <TabsContent value="questions" className="mt-6">
+                    <div className="space-y-4">
+                      <div className="bg-primary/5 p-4 rounded-xl border border-primary/10">
+                        <h4 className="font-bold text-primary mb-3">طرح سؤال جديد</h4>
+                        <div className="flex gap-2">
+                          <Input 
+                            value={newQuestion}
+                            onChange={(e) => setNewQuestion(e.target.value)}
+                            placeholder="اكتب سؤالك هنا..."
+                            className="text-right"
+                          />
+                          <Button onClick={handleAddQuestion} className="gap-2">
+                            <MessageSquare size={16} /> إرسال
+                          </Button>
+                        </div>
+                      </div>
+                      {studentQuestions.length > 0 ? (
+                        studentQuestions.map((q) => (
+                          <Card key={q.id} className="border-none hover:shadow-lg transition-all">
+                            <CardContent className="p-5">
+                              <div className="flex gap-4">
+                                <div className="text-2xl">❓</div>
+                                <div className="flex-1">
+                                  <p className="font-bold text-primary mb-2">{q.question}</p>
+                                  {q.answered ? (
+                                    <div className="bg-green-50 p-3 rounded-lg border border-green-200 text-sm">
+                                      <p className="font-bold text-green-700 mb-1">✓ إجابة من المعلم:</p>
+                                      <p className="text-green-700">{q.answer}</p>
+                                    </div>
+                                  ) : (
+                                    <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                                      <p className="text-xs text-yellow-700">⏳ في انتظار الإجابة...</p>
+                                    </div>
+                                  )}
+                                  <p className="text-xs text-muted-foreground mt-2">{q.date}</p>
+                                </div>
                               </div>
-                            </div>
-                            {studentQuestions.map((q) => (
-                        <Card key={q.id} className="border-none hover:shadow-lg transition-all">
-                          <CardContent className="p-5">
-                            <div className="flex gap-4">
-                              <div className="text-2xl">❓</div>
-                              <div className="flex-1">
-                                <p className="font-bold text-primary mb-2">{q.question}</p>
-                                {q.answered ? (
-                                  <div className="bg-green-50 p-3 rounded-lg border border-green-200 text-sm">
-                                    <p className="font-bold text-green-700 mb-1">✓ إجابة من المعلم:</p>
-                                    <p className="text-green-700">{q.answer}</p>
-                                  </div>
-                                ) : (
-                                  <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                                    <p className="text-xs text-yellow-700">⏳ في انتظار الإجابة...</p>
-                                  </div>
-                                )}
-                                <p className="text-xs text-muted-foreground mt-2">{q.date}</p>
-                              </div>
-                            </div>
+                            </CardContent>
+                          </Card>
+                        ))
+                      ) : (
+                        <Card className="border-none bg-muted/50">
+                          <CardContent className="p-8 text-center">
+                            <MessageSquare className="mx-auto mb-3 text-muted-foreground" size={40} />
+                            <p className="text-muted-foreground">لم تطرح أي أسئلة حتى الآن</p>
+                            <Button className="mt-4 gap-2">
+                              <MessageSquare size={16} /> اطرح سؤالاً
+                            </Button>
                           </CardContent>
                         </Card>
-                      ))
-                    ) : (
-                      <Card className="border-none bg-muted/50">
-                        <CardContent className="p-8 text-center">
-                          <MessageSquare className="mx-auto mb-3 text-muted-foreground" size={40} />
-                          <p className="text-muted-foreground">لم تطرح أي أسئلة حتى الآن</p>
-                          <Button className="mt-4 gap-2">
-                            <MessageSquare size={16} /> اطرح سؤالاً
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    )}
+                      )}
+                    </div>
                   </TabsContent>
                 </Tabs>
               </CardContent>

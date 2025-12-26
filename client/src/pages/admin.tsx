@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocation } from "wouter";
 import { Plus, Trash, Edit, Image as ImageIcon, FileText, Users, Settings, Save, LogOut, BookOpen, CheckCircle, AlertCircle, X, MessageSquare, Key, ClipboardList, Shield, UserCircle } from "lucide-react";
-import { useSchool, Teacher, Program, Article, AssignedCode, Question } from "@/lib/store";
+import { useSchool, Teacher, Program, Article, AssignedCode, Question, User } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { motion } from "framer-motion";
