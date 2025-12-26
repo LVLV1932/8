@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSchool } from "@/lib/store";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export function RegistrationsTab() {
   const { toast } = useToast();
+  const { registerUser } = useSchool();
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -24,22 +26,34 @@ export function RegistrationsTab() {
     const reg = registrations.find(r => r.id === id);
     if (!reg) return;
 
-    // Move to users
-    const users: any[] = JSON.parse(localStorage.getItem("users") || "[]");
-    users.push({
-      ...reg,
-      status: "approved"
+    // Direct registration via store
+    const success = registerUser({
+      name: reg.fullName,
+      email: reg.email,
+      password: reg.password,
+      role: reg.role,
+      grade: reg.grade
     });
-    localStorage.setItem("users", JSON.stringify(users));
 
-    // Update registration
-    const updated = registrations.map(r => 
-      r.id === id ? { ...r, status: "approved" } : r
-    );
-    setRegistrations(updated);
-    localStorage.setItem("registrations", JSON.stringify(updated));
+    if (success) {
+      // Update registration status locally
+      const updated = registrations.map(r => 
+        r.id === id ? { ...r, status: "approved" } : r
+      );
+      setRegistrations(updated);
+      localStorage.setItem("registrations", JSON.stringify(updated));
 
-    toast({ title: `✓ تم قبول طلب ${reg.fullName}` });
+      toast({ 
+        title: `✓ تم قبول طلب ${reg.fullName}`,
+        description: "تم إنشاء الحساب بنجاح ويظهر الآن في قائمة المستخدمين"
+      });
+    } else {
+      toast({ 
+        variant: "destructive",
+        title: "خطأ", 
+        description: "هذا البريد الإلكتروني مسجل مسبقاً في النظام" 
+      });
+    }
   };
 
   const handleReject = (id: number) => {

@@ -883,47 +883,104 @@ export default function Admin() {
               </TabsContent>
 
               <TabsContent value="users" className="mt-0">
-                <div>
-                  <h3 className="text-lg font-bold text-primary mb-6">إدارة المستخدمين والرتب</h3>
-                  <div className="space-y-4">
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="text-right">
+                      <h2 className="text-2xl font-bold text-primary">إدارة الحسابات</h2>
+                      <p className="text-muted-foreground">تعديل بيانات المستخدمين، الرتب، وكلمات المرور</p>
+                    </div>
+                    <span className="bg-primary/10 text-primary px-4 py-2 rounded-xl text-sm font-bold border border-primary/20">
+                      {users.length} مستخدم مسجل
+                    </span>
+                  </div>
+
+                  <div className="grid gap-4">
                     {users.map((user) => (
-                      <motion.div key={user.id} layout initial={{opacity: 0}} animate={{opacity: 1}} className="bg-background border rounded-xl p-6">
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex-1">
-                            <h4 className="font-bold text-primary text-lg">{user.name}</h4>
-                            <p className="text-sm text-muted-foreground mb-2">{user.email}</p>
-                            <div className="flex flex-wrap gap-2">
-                              {user.grade && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">الصف: {user.grade}</span>}
-                              {user.subject && <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">التخصص: {user.subject}</span>}
+                      <Card key={user.id} className="border-none shadow-sm hover:shadow-md transition-all group overflow-hidden">
+                        <CardContent className="p-0">
+                          <div className="flex items-center justify-between p-4 flex-row-reverse">
+                            <div className="flex items-center gap-4 flex-row-reverse">
+                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${
+                                user.role === 'admin' ? 'bg-gradient-to-br from-red-500 to-red-600' : 
+                                user.role === 'teacher' ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 
+                                'bg-gradient-to-br from-green-500 to-green-600'
+                              }`}>
+                                {user.role === 'admin' ? <Shield size={24} /> : user.role === 'teacher' ? <UserCircle size={24} /> : <Users size={24} />}
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold text-primary text-lg">{user.name}</p>
+                                <div className="flex items-center gap-2 flex-row-reverse">
+                                  <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-md ${
+                                    user.role === 'admin' ? 'bg-red-100 text-red-600' : 
+                                    user.role === 'teacher' ? 'bg-blue-100 text-blue-600' : 
+                                    'bg-green-100 text-green-600'
+                                  }`}>
+                                    {user.role === 'admin' ? 'مدير' : user.role === 'teacher' ? 'مدرس' : 'طالب'}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">{user.email}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="hover:bg-primary/5 text-muted-foreground hover:text-primary" onClick={() => setEditingUser(user)}>
+                                    <Edit size={18} />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-md">
+                                  <DialogHeader>
+                                    <DialogTitle className="text-2xl font-bold text-right">تعديل حساب: {user.name}</DialogTitle>
+                                  </DialogHeader>
+                                  {editingUser && (
+                                    <div className="space-y-4 py-6">
+                                      <div className="space-y-2 text-right">
+                                        <Label className="text-sm font-bold">الاسم الكامل</Label>
+                                        <Input value={editingUser.name} onChange={e => setEditingUser({...editingUser, name: e.target.value})} className="h-11 text-right" />
+                                      </div>
+                                      <div className="space-y-2 text-right">
+                                        <Label className="text-sm font-bold">الرتبة / الصلاحيات</Label>
+                                        <select 
+                                          className="w-full border-2 border-muted bg-background rounded-xl h-11 px-3 focus:border-primary transition-colors outline-none text-right"
+                                          value={editingUser.role}
+                                          onChange={e => setEditingUser({...editingUser, role: e.target.value as any})}
+                                        >
+                                          <option value="student">طالب</option>
+                                          <option value="teacher">مدرس</option>
+                                          <option value="admin">مدير النظام</option>
+                                        </select>
+                                      </div>
+                                      <div className="space-y-2 text-right">
+                                        <Label className="text-sm font-bold">كلمة المرور الجديدة</Label>
+                                        <Input type="text" value={editingUser.password} onChange={e => setEditingUser({...editingUser, password: e.target.value})} className="h-11 font-mono text-right" />
+                                      </div>
+                                      <Button onClick={() => {
+                                        updateUser(editingUser);
+                                        toast({ title: "✅ تم تحديث بيانات الحساب بنجاح" });
+                                      }} className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold text-lg rounded-xl shadow-lg shadow-primary/20">
+                                        حفظ التغييرات
+                                      </Button>
+                                    </div>
+                                  )}
+                                </DialogContent>
+                              </Dialog>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+                                onClick={() => {
+                                  if(confirm(`هل أنت متأكد من حذف حساب "${user.name}"؟ لا يمكن التراجع عن هذا الإجراء.`)) {
+                                    deleteUser(user.id);
+                                    toast({ variant: "destructive", title: "🗑️ تم حذف الحساب" });
+                                  }
+                                }}
+                              >
+                                <Trash size={18} />
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex gap-2">
-                            {user.role === "student" && (
-                              <span className="bg-accent/10 text-accent px-3 py-1 rounded-full text-sm font-bold">طالب 👨‍🎓</span>
-                            )}
-                            {user.role === "teacher" && (
-                              <span className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-bold">معلم 👨‍🏫</span>
-                            )}
-                            {user.role === "admin" && (
-                              <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold">إدارة 👨‍💼</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          {user.role !== "admin" && (
-                            <>
-                              <Button size="sm" variant="outline" className="gap-1" onClick={() => {
-                                updateUser({...user, role: "teacher"});
-                                toast({title: "تم تحديث الرتبة إلى معلم ✓"});
-                              }}>معلم</Button>
-                              <Button size="sm" variant="outline" className="gap-1" onClick={() => {
-                                updateUser({...user, role: "student"});
-                                toast({title: "تم تحديث الرتبة إلى طالب ✓"});
-                              }}>طالب</Button>
-                            </>
-                          )}
-                        </div>
-                      </motion.div>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 </div>
