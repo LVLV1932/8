@@ -52,6 +52,23 @@ export type User = {
   joinDate: string;
 };
 
+export type ClassRoom = {
+  id: number;
+  name: string;
+  teacherId?: number;
+  grade: string;
+};
+
+export type Lesson = {
+  id: number;
+  classId: number;
+  teacherId: number;
+  title: string;
+  content: string;
+  date: string;
+  files?: string[];
+};
+
 export type Notification = {
   id: number;
   userId: number;
@@ -89,6 +106,8 @@ type SchoolContextType = {
   programs: Program[];
   articles: Article[];
   users: User[];
+  classes: ClassRoom[];
+  lessons: Lesson[];
   assignedCodes: AssignedCode[];
   notifications: Notification[];
   questions: Question[];
@@ -102,6 +121,13 @@ type SchoolContextType = {
   registerUser: (user: Omit<User, "id" | "joinDate">) => boolean;
   updateUser: (user: User) => void;
   deleteUser: (id: number) => void;
+
+  // Class & Lesson actions
+  addClass: (classRoom: Omit<ClassRoom, "id">) => void;
+  updateClass: (classRoom: ClassRoom) => void;
+  deleteClass: (id: number) => void;
+  addLesson: (lesson: Omit<Lesson, "id" | "date">) => void;
+  deleteLesson: (id: number) => void;
 
   // Terms actions
   updateTerms: (terms: string) => void;
@@ -213,6 +239,18 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     return saved ? JSON.parse(saved) : initialUsers;
   });
 
+  const [classes, setClasses] = useState<ClassRoom[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem("school_classes");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [lessons, setLessons] = useState<Lesson[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem("school_lessons");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [assignedCodes, setAssignedCodes] = useState<AssignedCode[]>(() => {
     if (typeof window === 'undefined') return [];
     const saved = localStorage.getItem("school_assignedCodes");
@@ -255,6 +293,8 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("school_programs", JSON.stringify(programs));
       localStorage.setItem("school_articles", JSON.stringify(articles));
       localStorage.setItem("school_users", JSON.stringify(users));
+      localStorage.setItem("school_classes", JSON.stringify(classes));
+      localStorage.setItem("school_lessons", JSON.stringify(lessons));
       localStorage.setItem("school_assignedCodes", JSON.stringify(assignedCodes));
       localStorage.setItem("school_notifications", JSON.stringify(notifications));
       localStorage.setItem("school_questions", JSON.stringify(questions));
@@ -310,6 +350,31 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     if (currentUser?.id === updated.id) {
       setCurrentUser(updated);
     }
+  };
+
+  // Class & Lesson actions
+  const addClass = (classRoom: Omit<ClassRoom, "id">) => {
+    setClasses(prev => [...prev, { ...classRoom, id: Date.now() }]);
+  };
+
+  const updateClass = (updated: ClassRoom) => {
+    setClasses(prev => prev.map(c => c.id === updated.id ? updated : c));
+  };
+
+  const deleteClass = (id: number) => {
+    setClasses(prev => prev.filter(c => c.id !== id));
+  };
+
+  const addLesson = (lesson: Omit<Lesson, "id" | "date">) => {
+    setLessons(prev => [...prev, { 
+      ...lesson, 
+      id: Date.now(), 
+      date: new Date().toLocaleDateString('ar-EG') 
+    }]);
+  };
+
+  const deleteLesson = (id: number) => {
+    setLessons(prev => prev.filter(l => l.id !== id));
   };
 
   // Teacher actions
@@ -421,8 +486,9 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <SchoolContext.Provider value={{
-      teachers, programs, articles, users, assignedCodes, notifications, questions, config, terms, currentUser,
+      teachers, programs, articles, users, classes, lessons, assignedCodes, notifications, questions, config, terms, currentUser,
       loginUser, logoutUser, registerUser, updateUser, deleteUser,
+      addClass, updateClass, deleteClass, addLesson, deleteLesson,
       addTeacher, updateTeacher, deleteTeacher,
       addProgram, updateProgram, deleteProgram,
       addArticle, updateArticle, deleteArticle,

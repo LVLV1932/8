@@ -1,35 +1,47 @@
 import { Layout } from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSchool } from "@/lib/store";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { BookOpen, Users, MessageSquare, LogOut, BarChart3, Plus, Upload, CheckCircle, Clock } from "lucide-react";
+import { BookOpen, Users, MessageSquare, LogOut, Plus, Trash, FileText, CheckCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 export default function TeacherPortal() {
   const [, setLocation] = useLocation();
-  const { currentUser, logoutUser, questions, answerQuestion, articles } = useSchool();
+  const { currentUser, logoutUser, classes, lessons, addLesson, deleteLesson, questions, answerQuestion } = useSchool();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("dashboard");
+  
+  const [newLesson, setNewLesson] = useState({ title: "", content: "", classId: "" });
+  const [answerText, setAnswerText] = useState("");
+  const [answeringId, setAnsweringId] = useState<number | null>(null);
 
   if (!currentUser || currentUser.role !== "teacher") {
     setLocation("/login-new");
     return null;
   }
 
-  const [answerText, setAnswerText] = useState("");
-  const [selectedQuestion, setSelectedQuestion] = useState<number | null>(null);
+  const teacherClasses = classes.filter(c => c.teacherId === currentUser.id);
+  const teacherLessons = lessons.filter(l => l.teacherId === currentUser.id);
+  const unansweredQuestions = questions.filter(q => !q.answered);
+  const answeredQuestions = questions.filter(q => q.answered);
 
-  const handleLogout = () => {
-    logoutUser();
-    toast({ title: "تم تسجيل الخروج" });
-    setLocation("/");
+  const handleAddLesson = () => {
+    if (!newLesson.title || !newLesson.classId) return;
+    addLesson({
+      title: newLesson.title,
+      content: newLesson.content,
+      classId: Number(newLesson.classId),
+      teacherId: currentUser.id
+    });
+    setNewLesson({ title: "", content: "", classId: "" });
+    toast({ title: "تم إضافة الدرس بنجاح" });
   };
 
   const handleAnswerQuestion = (questionId: number) => {
@@ -39,259 +51,184 @@ export default function TeacherPortal() {
     }
     answerQuestion(questionId, answerText);
     setAnswerText("");
-    setSelectedQuestion(null);
+    setAnsweringId(null);
     toast({ title: "تم إرسال الإجابة ✓" });
   };
 
-  const unansweredQuestions = questions.filter(q => !q.answered);
-  const answeredQuestions = questions.filter(q => q.answered);
-
-  const studentCount = 45;
-  const classesPerWeek = 12;
-
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-secondary/10 via-primary/5 to-accent/5">
-        {/* Hero Section */}
+      <div className="min-h-screen bg-gradient-to-br from-secondary/10 via-primary/5 to-accent/5 pb-12">
         <div className="bg-gradient-to-r from-secondary via-primary to-accent text-white pt-12 pb-20">
-          <div className="container mx-auto px-4">
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-start">
-              <div>
-                <h1 className="text-5xl font-bold mb-3">مرحباً، {currentUser.name} 👨‍🏫</h1>
-                <p className="text-white/80">تخصص: {currentUser.subject}</p>
-              </div>
-              <Button 
-                variant="secondary" 
-                size="lg" 
-                className="gap-2 bg-white/20 hover:bg-white/30 border border-white/30"
-                onClick={handleLogout}
-              >
-                <LogOut size={18} /> خروج
-              </Button>
-            </motion.div>
+          <div className="container mx-auto px-4 flex justify-between items-center">
+            <div>
+              <h1 className="text-5xl font-bold mb-3">أهلاً بك، أستاذ {currentUser.name} 👨‍🏫</h1>
+              <p className="text-white/80">تخصص: {currentUser.subject} | لديك {teacherClasses.length} صفوف</p>
+            </div>
+            <Button variant="secondary" size="lg" className="gap-2 bg-white/20 hover:bg-white/30 border border-white/30" onClick={() => { logoutUser(); setLocation("/"); }}>
+              <LogOut size={18} /> خروج
+            </Button>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-12">
-          {/* Stats */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid md:grid-cols-4 gap-6 mb-12">
-            <Card className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-blue-100/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">الطلاب</p>
-                    <p className="text-3xl font-bold text-blue-600">{studentCount}</p>
-                  </div>
-                  <Users className="text-blue-600" size={32} />
+        <div className="container mx-auto px-4 -mt-12">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid md:grid-cols-3 gap-6 mb-12">
+            <Card className="border-none shadow-lg bg-white/80 backdrop-blur">
+              <CardContent className="p-6 flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm">صفوفي</p>
+                  <p className="text-3xl font-bold text-blue-600">{teacherClasses.length}</p>
                 </div>
+                <Users className="text-blue-600" size={32} />
               </CardContent>
             </Card>
-
-            <Card className="border-none shadow-lg bg-gradient-to-br from-green-50 to-green-100/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">الحصص أسبوعياً</p>
-                    <p className="text-3xl font-bold text-green-600">{classesPerWeek}</p>
-                  </div>
-                  <Clock className="text-green-600" size={32} />
+            <Card className="border-none shadow-lg bg-white/80 backdrop-blur">
+              <CardContent className="p-6 flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm">أسئلة بانتظار</p>
+                  <p className="text-3xl font-bold text-purple-600">{unansweredQuestions.length}</p>
                 </div>
+                <MessageSquare className="text-purple-600" size={32} />
               </CardContent>
             </Card>
-
-            <Card className="border-none shadow-lg bg-gradient-to-br from-purple-50 to-purple-100/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">أسئلة بانتظار</p>
-                    <p className="text-3xl font-bold text-purple-600">{unansweredQuestions.length}</p>
-                  </div>
-                  <MessageSquare className="text-purple-600" size={32} />
+            <Card className="border-none shadow-lg bg-white/80 backdrop-blur">
+              <CardContent className="p-6 flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm">دروسي المنشورة</p>
+                  <p className="text-3xl font-bold text-orange-600">{teacherLessons.length}</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg bg-gradient-to-br from-orange-50 to-orange-100/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">الدروس المرفوعة</p>
-                    <p className="text-3xl font-bold text-orange-600">{articles.length}</p>
-                  </div>
-                  <BookOpen className="text-orange-600" size={32} />
-                </div>
+                <BookOpen className="text-orange-600" size={32} />
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Main Content */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Card className="border-none shadow-2xl">
-              <CardHeader className="border-b bg-gradient-to-r from-primary/5 to-secondary/5 pb-6">
-                <CardTitle className="text-2xl text-primary">لوحة التحكم</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-4 mb-6">
-                    <TabsTrigger value="dashboard">اللوحة</TabsTrigger>
-                    <TabsTrigger value="questions">الأسئلة</TabsTrigger>
-                    <TabsTrigger value="uploads">الدروس</TabsTrigger>
-                    <TabsTrigger value="students">الطلاب</TabsTrigger>
-                  </TabsList>
+          <Tabs defaultValue="classes">
+            <TabsList className="mb-8 bg-white/50 backdrop-blur p-1 rounded-xl shadow-sm">
+              <TabsTrigger value="classes" className="rounded-lg px-8">صفوفي</TabsTrigger>
+              <TabsTrigger value="lessons" className="rounded-lg px-8">الدروس</TabsTrigger>
+              <TabsTrigger value="questions" className="rounded-lg px-8">الأسئلة</TabsTrigger>
+            </TabsList>
 
-                  <TabsContent value="dashboard" className="mt-6">
-                    <div className="space-y-6">
-                      <Card className="border-none bg-muted/50">
-                        <CardContent className="p-6">
-                          <h3 className="text-lg font-bold text-primary mb-3">📊 إحصائيات سريعة</h3>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div className="bg-white p-4 rounded-lg border">
-                              <p className="text-muted-foreground text-sm mb-1">متوسط حضور الطلاب</p>
-                              <p className="text-2xl font-bold text-primary">92%</p>
-                            </div>
-                            <div className="bg-white p-4 rounded-lg border">
-                              <p className="text-muted-foreground text-sm mb-1">متوسط التقييم</p>
-                              <p className="text-2xl font-bold text-secondary">4.8/5 ⭐</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="border-none">
-                        <CardContent className="p-6">
-                          <h3 className="text-lg font-bold text-primary mb-4">📋 رسالة للطلاب</h3>
-                          <Textarea placeholder="أكتب رسالة تحفيزية للطلاب..." className="mb-3" />
-                          <Button className="gap-2"><Plus size={16} /> إرسال رسالة</Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="questions" className="mt-6 space-y-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-primary mb-4">❓ أسئلة الطلاب ({unansweredQuestions.length} بانتظار)</h3>
-                      {unansweredQuestions.length > 0 ? (
-                        unansweredQuestions.map((q) => (
-                          <Card key={q.id} className="border-2 border-yellow-300 bg-yellow-50">
-                            <CardContent className="p-5">
-                              <div className="flex justify-between items-start mb-3">
-                                <div className="flex-1">
-                                  <p className="font-bold text-primary mb-1">{q.question}</p>
-                                  <p className="text-xs text-muted-foreground">من: {q.studentName} ({q.studentEmail})</p>
-                                </div>
-                                <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full">بانتظار</span>
-                              </div>
-                              
-                              {selectedQuestion === q.id ? (
-                                <div className="mt-4 p-4 bg-white rounded-lg border border-yellow-300">
-                                  <Label className="mb-2 block font-bold">إجابتك:</Label>
-                                  <Textarea 
-                                    value={answerText}
-                                    onChange={(e) => setAnswerText(e.target.value)}
-                                    placeholder="أكتب إجابتك هنا..."
-                                    className="mb-3"
-                                  />
-                                  <div className="flex gap-2">
-                                    <Button size="sm" onClick={() => handleAnswerQuestion(q.id)} className="gap-1">
-                                      <CheckCircle size={16} /> إرسال الإجابة
-                                    </Button>
-                                    <Button size="sm" variant="outline" onClick={() => setSelectedQuestion(null)}>إلغاء</Button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  className="mt-3"
-                                  onClick={() => setSelectedQuestion(q.id)}
-                                >
-                                  الرد على السؤال
-                                </Button>
-                              )}
-                            </CardContent>
-                          </Card>
-                        ))
-                      ) : (
-                        <Card className="border-none bg-muted/50">
-                          <CardContent className="p-8 text-center">
-                            <CheckCircle className="mx-auto mb-3 text-green-600" size={40} />
-                            <p className="text-muted-foreground">لا توجد أسئلة بانتظار الإجابة</p>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </div>
-
-                    {answeredQuestions.length > 0 && (
-                      <div className="mt-8">
-                        <h3 className="text-lg font-bold text-primary mb-4">✓ الأسئلة المجابة ({answeredQuestions.length})</h3>
-                        <div className="space-y-3">
-                          {answeredQuestions.map((q) => (
-                            <Card key={q.id} className="border-none bg-green-50">
-                              <CardContent className="p-4">
-                                <p className="font-bold text-primary mb-1">{q.question}</p>
-                                <p className="text-sm text-green-700 mb-2">✓ {q.answer}</p>
-                                <p className="text-xs text-muted-foreground">الإجابة في: {q.date}</p>
-                              </CardContent>
-                            </Card>
-                          ))}
+            <TabsContent value="classes">
+              <div className="grid md:grid-cols-2 gap-6">
+                {teacherClasses.map(c => (
+                  <Card key={c.id} className="border-none bg-white/80 backdrop-blur hover:shadow-xl transition-all group overflow-hidden">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start">
+                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                          <Users size={24} />
+                        </div>
+                        <div className="text-right">
+                          <h3 className="text-2xl font-bold text-primary">{c.grade} - {c.name}</h3>
+                          <p className="text-muted-foreground">قم بإدارة الدروس والطلاب لهذا الصف</p>
                         </div>
                       </div>
-                    )}
-                  </TabsContent>
+                      <Button className="mt-6 w-full h-12 text-lg font-bold rounded-xl shadow-lg shadow-primary/10">عرض قائمة الطلاب</Button>
+                    </CardContent>
+                  </Card>
+                ))}
+                {teacherClasses.length === 0 && (
+                  <div className="col-span-2 text-center py-20 bg-white/50 rounded-3xl border-2 border-dashed border-muted-foreground/20">
+                    <p className="text-muted-foreground text-xl">لا توجد صفوف معينة لك حالياً</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
 
-                  <TabsContent value="uploads" className="mt-6">
-                    <Card className="border-none">
-                      <CardContent className="p-6">
-                        <h3 className="text-lg font-bold text-primary mb-6">📚 رفع درس جديد</h3>
-                        <div className="space-y-4">
-                          <div className="space-y-2">
-                            <Label>عنوان الدرس</Label>
-                            <Input placeholder="الدوال والمعادلات" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>الوصف</Label>
-                            <Textarea placeholder="وصف الدرس..." rows={4} />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>الملفات</Label>
-                            <div className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-muted/50 transition-all">
-                              <Upload className="mx-auto mb-2 text-muted-foreground" size={32} />
-                              <p className="text-muted-foreground">اسحب الملفات أو اضغط للاختيار</p>
-                            </div>
-                          </div>
-                          <Button className="w-full gap-2"><Plus size={16} /> رفع الدرس</Button>
+            <TabsContent value="lessons">
+              <div className="grid lg:grid-cols-3 gap-8">
+                <Card className="lg:col-span-1 border-none shadow-xl">
+                  <CardHeader><CardTitle className="text-xl font-bold">نشر درس جديد</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="font-bold">اختيار الصف</Label>
+                      <select 
+                        className="w-full border-2 border-muted bg-background rounded-xl p-3 text-right focus:border-primary transition-colors outline-none" 
+                        value={newLesson.classId}
+                        onChange={e => setNewLesson({...newLesson, classId: e.target.value})}
+                      >
+                        <option value="">-- اختر الصف --</option>
+                        {teacherClasses.map(c => <option key={c.id} value={c.id}>{c.grade} - {c.name}</option>)}
+                      </select>
+                    </div>
+                    <div className="space-y-2 text-right">
+                      <Label className="font-bold">عنوان الدرس</Label>
+                      <Input placeholder="أدخل عنوان الدرس..." value={newLesson.title} onChange={e => setNewLesson({...newLesson, title: e.target.value})} className="text-right h-12" />
+                    </div>
+                    <div className="space-y-2 text-right">
+                      <Label className="font-bold">محتوى الدرس</Label>
+                      <Textarea placeholder="أدخل تفاصيل الدرس..." value={newLesson.content} onChange={e => setNewLesson({...newLesson, content: e.target.value})} className="text-right" rows={5} />
+                    </div>
+                    <Button className="w-full h-12 text-lg font-bold gap-2" onClick={handleAddLesson}><Plus size={20} /> نشر الآن</Button>
+                  </CardContent>
+                </Card>
+
+                <div className="lg:col-span-2 space-y-4">
+                  <h3 className="font-bold text-xl mb-4 text-primary text-right">قائمة الدروس المنشورة</h3>
+                  {teacherLessons.map(l => (
+                    <Card key={l.id} className="border-none shadow-md bg-white/80 hover:bg-white transition-all">
+                      <CardContent className="p-6 flex justify-between items-center">
+                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-12 w-12" onClick={() => deleteLesson(l.id)}>
+                          <Trash size={20} />
+                        </Button>
+                        <div className="text-right">
+                          <h4 className="font-bold text-primary text-xl">{l.title}</h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            الصف: {classes.find(c => c.id === l.classId)?.name} | بتاريخ: {l.date}
+                          </p>
                         </div>
                       </CardContent>
                     </Card>
-                  </TabsContent>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
 
-                  <TabsContent value="students" className="mt-6">
-                    <div className="space-y-3">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Card key={i} className="border-none hover:shadow-lg transition-all">
-                          <CardContent className="p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                {String.fromCharCode(65 + i)}
-                              </div>
-                              <div>
-                                <p className="font-bold text-primary">طالب {i + 1}</p>
-                                <p className="text-xs text-muted-foreground">student{i + 1}@school.iq</p>
-                              </div>
+            <TabsContent value="questions">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-primary mb-4 text-right">❓ أسئلة جديدة ({unansweredQuestions.length})</h3>
+                  {unansweredQuestions.map((q) => (
+                    <Card key={q.id} className="border-2 border-yellow-200 bg-yellow-50/50 hover:bg-yellow-50 transition-all">
+                      <CardContent className="p-6">
+                        <div className="text-right mb-4">
+                          <p className="font-bold text-primary text-xl leading-relaxed">{q.question}</p>
+                          <div className="flex justify-end gap-2 items-center mt-2">
+                             <span className="text-xs text-muted-foreground">{q.date}</span>
+                             <span className="text-xs font-bold text-primary/70">من: {q.studentName}</span>
+                          </div>
+                        </div>
+                        {answeringId === q.id ? (
+                          <div className="mt-4 space-y-4">
+                            <Textarea value={answerText} onChange={(e) => setAnswerText(e.target.value)} placeholder="اكتب إجابتك هنا..." className="text-right text-lg p-4" rows={4} />
+                            <div className="flex gap-2">
+                              <Button size="lg" className="flex-1 font-bold" onClick={() => handleAnswerQuestion(q.id)}>إرسال الإجابة</Button>
+                              <Button size="lg" variant="outline" className="font-bold" onClick={() => setAnsweringId(null)}>إلغاء</Button>
                             </div>
-                            <div className="text-right">
-                              <p className="text-sm font-bold text-secondary">{85 + i}%</p>
-                              <p className="text-xs text-muted-foreground">المعدل</p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </motion.div>
+                          </div>
+                        ) : (
+                          <Button size="lg" className="w-full font-bold h-12 bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all" onClick={() => { setAnsweringId(q.id); setAnswerText(""); }}>الرد الآن</Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-green-700 mb-4 text-right">✓ تم الرد عليها ({answeredQuestions.length})</h3>
+                  {answeredQuestions.map((q) => (
+                    <Card key={q.id} className="border-none bg-green-50/50 hover:bg-green-50 transition-all">
+                      <CardContent className="p-6 text-right">
+                        <p className="font-bold text-primary text-lg mb-2">{q.question}</p>
+                        <div className="bg-white/80 p-4 rounded-xl border border-green-100">
+                          <p className="text-green-700 leading-relaxed font-medium">✓ الإجابة: {q.answer}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </Layout>

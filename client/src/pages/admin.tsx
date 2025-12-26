@@ -25,11 +25,14 @@ export default function Admin() {
     assignedCodes, addAssignedCode, updateAssignedCode, deleteAssignedCode,
     questions, answerQuestion, deleteQuestion,
     users, updateUser, deleteUser,
+    classes, addClass, updateClass, deleteClass,
     terms, updateTerms
   } = useSchool();
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newTerms, setNewTerms] = useState(terms);
+  const [newClassName, setNewClassName] = useState("");
+  const [newClassGrade, setNewClassGrade] = useState("");
 
   // Local state for forms
   const [newTeacher, setNewTeacher] = useState({ name: "", email: "", subject: "", role: "", bio: "" });
@@ -239,6 +242,14 @@ export default function Admin() {
                 >
                   <div className="flex items-center gap-2">
                     <FileText size={16}/> الشروط والأحكام
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="classes" 
+                  className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-secondary data-[state=active]:bg-transparent data-[state=active]:text-secondary data-[state=active]:shadow-none transition-all whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    <Users size={16}/> الصفوف الدراسية
                   </div>
                 </TabsTrigger>
               </TabsList>
@@ -920,6 +931,68 @@ export default function Admin() {
                 </div>
               </TabsContent>
 
+              <TabsContent value="classes" className="mt-0">
+                <div className="space-y-6">
+                  <div className="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                    <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">إضافة صف دراسي جديد</h3>
+                    <div className="flex gap-4">
+                      <Input 
+                        placeholder="اسم الصف (مثال: أ)" 
+                        value={newClassName}
+                        onChange={(e) => setNewClassName(e.target.value)}
+                        className="text-right"
+                      />
+                      <Input 
+                        placeholder="المرحلة (مثال: الأول المتوسط)" 
+                        value={newClassGrade}
+                        onChange={(e) => setNewClassGrade(e.target.value)}
+                        className="text-right"
+                      />
+                      <Button onClick={() => {
+                        if(!newClassName || !newClassGrade) return;
+                        addClass({ name: newClassName, grade: newClassGrade });
+                        setNewClassName("");
+                        setNewClassGrade("");
+                        toast({ title: "تم إضافة الصف بنجاح" });
+                      }}>إضافة</Button>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {classes.map((c) => (
+                      <Card key={c.id} className="border-none shadow-sm">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-center">
+                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteClass(c.id)}>
+                              <Trash size={16} />
+                            </Button>
+                            <div className="text-right">
+                              <p className="font-bold text-primary">{c.grade} - {c.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {teachers.find(t => t.id === c.teacherId)?.name || "لا يوجد معلم معين"}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-4">
+                            <Label className="text-xs mb-2 block">تعيين معلم للصف</Label>
+                            <select 
+                              className="w-full text-xs border rounded p-1"
+                              value={c.teacherId || ""}
+                              onChange={(e) => updateClass({ ...c, teacherId: Number(e.target.value) })}
+                            >
+                              <option value="">اختر معلم</option>
+                              {teachers.map(t => (
+                                <option key={t.id} value={t.id}>{t.name} ({t.subject})</option>
+                              ))}
+                            </select>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+
               <TabsContent value="users" className="mt-0">
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-6">
@@ -986,6 +1059,23 @@ export default function Admin() {
                                           <option value="student">طالب</option>
                                           <option value="teacher">مدرس</option>
                                           <option value="admin">مدير النظام</option>
+                                        </select>
+                                      </div>
+                                      <div className="space-y-2 text-right">
+                                        <Label className="text-sm font-bold">المادة الدراسية (للمعلمين)</Label>
+                                        <Input value={editingUser.subject || ""} onChange={e => setEditingUser({...editingUser, subject: e.target.value})} className="h-11 text-right" placeholder="مثال: الرياضيات" />
+                                      </div>
+                                      <div className="space-y-2 text-right">
+                                        <Label className="text-sm font-bold">الصف / المرحلة (للطلاب)</Label>
+                                        <select 
+                                          className="w-full border-2 border-muted bg-background rounded-xl h-11 px-3 focus:border-primary transition-colors outline-none text-right"
+                                          value={editingUser.grade || ""}
+                                          onChange={e => setEditingUser({...editingUser, grade: e.target.value})}
+                                        >
+                                          <option value="">اختر الصف</option>
+                                          {classes.map(c => (
+                                            <option key={c.id} value={c.grade}>{c.grade}</option>
+                                          ))}
                                         </select>
                                       </div>
                                       <div className="space-y-2 text-right">
